@@ -40,3 +40,6 @@
 - Gestión de colecciones o favoritos
   - Los usuarios podran guardar publicaciones en una seccion de favoritos que solo podra ver el propio usuario. Esta estara dividida en colecciones , las cuales no pueden tener 
     la misma publicacion repetida.
+
+## Diagrama Entidad Relacion (v1)
+![DER del proyecto](./DER-TPI-WEB2.png)
