@@ -15,7 +15,7 @@
   - Usuarios anonimos podran ver contenido sin copyright.
 - Gestion de contenido.
   - Podran postear publicaciones con titulo, descripcion (opcional), varias imagenes y varias etiquetas.
-  - Las publicaciones se podran denunciar con motivo y descripcion. Si la publicacion tiene una denuncia no se podra editar.
+  - Las imagenes se podran denunciar con motivo y descripcion. Si la publicacion tiene una denuncia no se podra editar.
     Si la publicacion tiene 3 denuncias pasara a una lista negra que vera el admin , donde puede desetimarlas o dar de baja la publicacion.
     Si el usuario tiene 3 publicaciones dadas de baja se inactivara su cuenta.
   - Se podran comentar las imagenes de la publicacion. Esta seccion se podra desactivar por el propietario , pero se vera el historial antes de que lo hiciera.
