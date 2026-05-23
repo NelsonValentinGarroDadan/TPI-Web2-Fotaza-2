@@ -4,8 +4,8 @@
   "description": "- Desarrollar y poner en práctica los conocimientos adquiridos en la asignatura a partir del desarrollo de un caso de estudio.",
   "main": "index.js",
   "scripts": {
-    "start": "node ./src/index.js",
-    "dev": "node  --watch ./src/index.js",
+    "start": "node ./index.js",
+    "dev": "node  --watch ./index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,6 +21,9 @@
   },
   "homepage": "https://github.com/NelsonValentinGarroDadan/TPI-Web2-Fotaza-2#readme",
   "dependencies": {
-    "express": "^5.2.1"
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "mysql2": "^3.22.3",
+    "sequelize": "^6.37.8"
   }
 }
