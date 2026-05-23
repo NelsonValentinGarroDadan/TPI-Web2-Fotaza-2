@@ -43,3 +43,6 @@
 
 ## Diagrama Entidad Relacion (v1)
 ![DER del proyecto](./DER-TPI-WEB2.png)
+
+## Diagrama Relacional (v1)
+![DER del proyecto](./DR-TPI-WEB2.png)
