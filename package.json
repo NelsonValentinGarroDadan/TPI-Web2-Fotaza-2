@@ -7,6 +7,7 @@
     "start": "node ./index.js",
     "db:init": "npx sequelize-cli db:migrate",
     "dev": "node  --watch --trace-warnings ./index.js",
+    "dev:css": "tailwindcss -i ./public/css/main.css -o ./public/css/output.css --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -22,6 +23,7 @@
   },
   "homepage": "https://github.com/NelsonValentinGarroDadan/TPI-Web2-Fotaza-2#readme",
   "dependencies": {
+    "@tailwindcss/cli": "^4.3.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -29,7 +31,10 @@
     "mysql2": "^3.22.3",
     "pg": "^8.21.0",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.37.8"
+    "pug": "^3.0.4",
+    "sequelize": "^6.37.8",
+    "tailwindcss": "^4.3.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "sequelize-cli": "^6.6.5"

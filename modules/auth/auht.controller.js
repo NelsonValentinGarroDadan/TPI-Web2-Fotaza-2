@@ -1,8 +1,9 @@
-const AppError = require("../../errors/appError")
-const authService = require("./auth.service.js")
+const AppError = require("../../errors/appError");
+const authService = require("./auth.service.js");
+const pug = require("pug");
 module.exports = {
     login: (req, res) => {
-        throw new AppError(400, "No tengo ganas de contestarte")
+        res.render("auth/register.pug")
     },
 
     register: (req, res) => {
