@@ -1,4 +1,4 @@
-const AppError = require("../../errors/appError");
+const AppError = require("../../errors/appError.js");
 const authService = require("./auth.service.js");
 const pug = require("pug");
 module.exports = {
