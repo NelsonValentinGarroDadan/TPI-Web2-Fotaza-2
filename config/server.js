@@ -10,7 +10,6 @@ const app = express();
 
 app.use(express.json());
 app.use(cors())
-app.use(errorsHandler);
 app.use(express.static('public'));
 
 app.set('view engine', 'pug');
@@ -24,4 +23,5 @@ app.use("/autentication", authRoutes);
 //middleware de JWT
 app.use(router);
 
+app.use(errorsHandler);
 module.exports = app;

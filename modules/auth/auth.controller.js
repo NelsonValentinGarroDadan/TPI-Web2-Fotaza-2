@@ -6,11 +6,9 @@ module.exports = {
         res.render("auth/register.pug")
     },
 
-    register: (req, res) => {
-        
-        const { nickname } = req.body;
+    register: async (req, res) => { 
 
-        authService.register(nickname);
+        await authService.register(req.body);
 
         res.status(200).send({ message: "Registro exitoso!"});
     }

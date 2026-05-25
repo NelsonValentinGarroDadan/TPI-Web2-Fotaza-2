@@ -1,13 +1,13 @@
 const AppError = require("../errors/appError");
 
-const Validator = (schema) => (
+const ValidatorHandler = (schema) => (
     (req, res, next) => {
         const result = schema.safeParse(req.body);
 
         if(!result.success){
             const errors = result.error.issues.map( issue => issue.message);
 
-            throw new AppError(400, error.join(', '));
+            throw new AppError(400, errors.join(', '));
         }
 
         req.body = result.data;
@@ -15,3 +15,5 @@ const Validator = (schema) => (
         next();
     }
 );
+
+module.exports = ValidatorHandler;

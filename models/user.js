@@ -18,8 +18,8 @@ module.exports = (sequelize, DataTypes) => {
     password: DataTypes.STRING,
     biography: DataTypes.STRING,
     profile_img: DataTypes.STRING,
-    active: DataTypes.BOOLEAN,
-    is_admin: DataTypes.BOOLEAN
+    active: {type: DataTypes.BOOLEAN, defaultValue: true},
+    is_admin: {type: DataTypes.BOOLEAN , defaultValue: false}
   }, {
     sequelize,
     modelName: 'User',
