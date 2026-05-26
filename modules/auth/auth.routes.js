@@ -6,6 +6,7 @@ const authRoutes = Router();
 
 authRoutes.get("/login", authController.login);
 
-authRoutes.post("/register", ValidatorHandler(registerDTO) ,authController.register)
+authRoutes.get("/register", authController.registerRenderView);
+authRoutes.post("/register", ValidatorHandler(registerDTO) ,authController.register);
 
 module.exports = authRoutes;

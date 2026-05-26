@@ -1,1 +1,27 @@
 @import "tailwindcss";
+
+:root{
+    --font-sans: 'Arial', 'Helvetica', sans-serif;
+    --primary-bk : #f5f5f5;
+    --color-white : #ffffff;
+    --color-blue-l : #009ae3;
+    --color-blue : #007bd8;
+    --color-win-gray: #808080; 
+    --color-win-gray-l: #c2c2c2; 
+}
+
+@theme{
+    --font-sans : var(--font-sans);
+    --color-bk : var(--primary-bk);
+    --color-white : var(--color-white);
+    --color-blue-l : var(--color-blue-1);
+    --color-blue : var(--color-blue);
+    --color-win-gray: var(--color-win-gray); 
+    --color-win-gray-l: var(--color-win-gray-l); 
+}
+ 
+  
+input, 
+textarea{
+    outline: none;
+}

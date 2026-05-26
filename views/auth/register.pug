@@ -1,4 +1,134 @@
-extend ../layouts/main.pug
-block content
-    h1.flex.w-full.items-center.justify-center.text-red-400 Hola mi lider
-         
+extend ../layouts/container-center.pug
+include ../components/win-border.pug
+block centerContent
+
+    - 
+        const inputs = [
+            {
+                label : "Nickname",
+                inputType : "text",
+                name : "nickname",
+                optional : false, 
+                placeholder : "Jose_Vargas"
+            },
+            {
+                label : "Contraseña",
+                inputType : "password",
+                name : "password",
+                optional : false,
+                placeholder : "********"
+            },
+            {
+                label : "Confirmar Contraseña",
+                inputType : "password",
+                name : "confirm-password",
+                optional : false,
+                placeholder : "********"
+            },
+            {
+                label : "Biografia",
+                inputType : "textArea",
+                name : "biography", 
+                optional : true,
+                placeholder : "Soy una persona interesante , me gusta tomar fotos..."
+            },
+        ]; 
+    section(class="w-[40vw] min-h-[90vh] h-full  border-2 border-black  bg-white flex flex-col items-center justify-start gap-4 pb-2")
+
+        div(class="w-full flex items-center justify-start bg-linear-to-r from-blue to-blue-l px-2 gap-1")
+            img(
+                src="/icons/camera.svg"
+                class="w-6 h-6 text-white"
+                alt="Icono de camara"
+            )
+            h1(class="text-white w-full font-bold text-sm") Crear una nueva cuenta - Fotaza 2  
+
+        label(for="profile_img") Foto de perfil 
+        form(
+            class="flex flex-col items-center justify-start gap-4 w-full"
+            id="form-register"
+        )
+            div(class="relative w-20 h-20 cursor-pointer")
+
+                +winBorder("w-full h-full")
+                    img(
+                        src="/icons/user-plus-bold.svg"
+                        alt="Icono de agregar usuario"
+                        class="bg-blue p-2 w-full h-full"
+                        id="profile_img_preview"
+                    )
+
+                    input(
+                        type="file"
+                        accept="image/*"
+                        name="profile_img"
+                        id="profile_img"
+                        class="absolute inset-0 opacity-0 cursor-pointer"
+                    )
+
+                    button(
+                        type="button"
+                        id="remove_profile_img"
+                        class="hidden absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-sm z-20 cursor-pointer"
+                    ) X
+
+            section(class="px-4 flex flex-col items-center justify-start w-full gap-1")
+                - for(let i=0; i < inputs.length; i++)
+
+                    label(
+                        for=inputs[i].name 
+                        class="text-black text-sm w-full"
+                    ) 
+                        = inputs[i].label  
+
+                        if !inputs[i].optional 
+                            span(
+                                class="text-red-500 text-sm mb-1"
+                            ) *
+
+                    if inputs[i].inputType == "textArea"
+                        +winBorder("w-full")
+                            textarea(
+                                name=inputs[i].name id=inputs[i].name 
+                                class="text-black text-sm h-20 w-full resize-none px-2 "
+                                placeholder=inputs[i].placeholder
+                            )
+                    else 
+                        +winBorder("w-full")
+                            input(
+                                type=inputs[i].inputType
+                                name=inputs[i].name id=inputs[i].name 
+                                class="text-black text-sm w-full px-2"
+                                placeholder=inputs[i].placeholder
+                            ) 
+
+                    
+                    span(
+                        class="text-red-500 text-sm h-4 w-full"
+                        id=`${inputs[i].name}-error`
+                    )
+
+                div#form-error.text-red-500.text-sm.w-full.text-center.h-4.w-full
+
+                div(class="mt-3 w-[50%]")
+                    +winBorder("w-full")
+                        button(
+                            type="submit"  
+                            id="button-submit-register"
+                            class="text-white cursor-pointer w-full py-1 bg-blue-l hover:bg-blue border border-black text-lg"
+                        ) Crear cuenta
+
+            hr(class="w-[80%] color-win-gray")
+            
+            .flex.items-center.justify-center.gap-2
+                p(class="text-black text-sm") ¿Ya tienes una cuenta? 
+                a(
+                    href="/login" 
+                    class="text-lg hover:text-blue text-blue-l cursor-pointer underline"
+                ) Iniciar Sesión
+        script(src="/js/auth/previewProfileImg.js") 
+        script(src="/js/helpers/errors.js" type="module") 
+        script(src="/js/helpers/validator.js" type="module") 
+        script(src="/js/auth/registerSchema.js" type="module") 
+        script(src="/js/auth/sendRegister.js" type="module")
+        script(src="/js/auth/validatorRegister.js" type="module")  
