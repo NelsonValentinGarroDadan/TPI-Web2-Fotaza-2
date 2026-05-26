@@ -10,7 +10,10 @@ module.exports = {
     },
     register: async (req, res) => { 
 
-        await authService.register(req.body);
+        await authService.register({
+            ...req.body,
+            profile_img : req.file?.path,
+        });
 
         res.status(200).send({ message: "Registro exitoso!"});
     }

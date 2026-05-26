@@ -4,8 +4,7 @@ import { registerSchema } from "./registerSchema.js";
 import { sendRegister } from "./sendRegister.js";
 
 const button = document.getElementById("button-submit-register");
-const form = document.getElementById("form-register");
-const formErro = document.getElementById("form-error");
+const form = document.getElementById("form-register"); 
 
 form.addEventListener("submit", async (e) => {
 
@@ -42,7 +41,12 @@ form.addEventListener("submit", async (e) => {
     button.disabled = true;
     button.textContent = "Cargando...";
 
-    const response = await sendRegister(formData);
+    const payload = new FormData();
+    Object.entries(formData).forEach(([k, v]) => payload.append(k, v));
+    const file = document.getElementById("profile_img").files[0];
+    if (file) payload.append("profile_img", file);
+
+    const response = await sendRegister(payload);
 
     if (!response.ok) {
         button.disabled = false;

@@ -1,11 +1,8 @@
 export const sendRegister = async (data) => {
     try {
         const res = await fetch("/autentication/register", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(data)
+            method: "POST", 
+            body: data
         });
 
         const result = await res.json();

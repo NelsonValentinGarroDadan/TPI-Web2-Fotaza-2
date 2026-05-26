@@ -1,4 +1,3 @@
-require('dotenv').config();
 const bcrypt = require("bcrypt"); 
 const authRepository = require("./auth.repository");
 const AppError = require("../../errors/appError");
@@ -10,7 +9,8 @@ module.exports = {
 
         const salt = await bcrypt.genSalt(10);
         const hashPass = await bcrypt.hash(user.password, salt);
+ 
 
-        return authRepository.createUser({ ...user , password : hashPass});
+        return authRepository.createUser({ ...user , password : hashPass, profile_img: user.profile_img});
     },
 };
