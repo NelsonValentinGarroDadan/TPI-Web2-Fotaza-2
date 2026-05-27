@@ -36,3 +36,19 @@ export const registerSchema = {
         }
     }
 };
+
+export const loginSchema = {
+    nickname: {
+        required: true,
+        messages: {
+            required: "El nickname es obligatorio.",
+        }
+    },
+
+    password: {
+        required: true,
+        messages: {
+            required: "La contraseña es obligatoria.",
+        }
+    },
+};

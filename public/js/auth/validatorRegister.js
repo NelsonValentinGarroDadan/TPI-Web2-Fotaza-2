@@ -1,7 +1,7 @@
 import { clearErrors, showErrors } from "../helpers/errors.js";
 import { validate } from "../helpers/validator.js";
-import { registerSchema } from "./registerSchema.js";
-import { sendRegister } from "./sendRegister.js";
+import { registerSchema } from "./schemas.js";
+import { sendRegister } from "./senders.js";
 
 const button = document.getElementById("button-submit-register");
 const form = document.getElementById("form-register"); 
@@ -60,6 +60,6 @@ form.addEventListener("submit", async (e) => {
     button.style.background = "green";
 
     setTimeout(() => {
-        window.location.href = "/login";
+        window.location.href = "/autentication/login";
     }, 1000);
 });

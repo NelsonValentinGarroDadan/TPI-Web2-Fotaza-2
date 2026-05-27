@@ -192,8 +192,17 @@
   .-right-2 {
     right: calc(var(--spacing) * -2);
   }
+  .bottom-0 {
+    bottom: calc(var(--spacing) * 0);
+  }
+  .left-0 {
+    left: calc(var(--spacing) * 0);
+  }
   .z-20 {
     z-index: 20;
+  }
+  .mt-2 {
+    margin-top: calc(var(--spacing) * 2);
   }
   .mt-3 {
     margin-top: calc(var(--spacing) * 3);
@@ -210,6 +219,9 @@
   .hidden {
     display: none;
   }
+  .table {
+    display: table;
+  }
   .h-4 {
     height: calc(var(--spacing) * 4);
   }
@@ -222,6 +234,9 @@
   .h-full {
     height: 100%;
   }
+  .min-h-\[60vh\] {
+    min-height: 60vh;
+  }
   .min-h-\[90vh\] {
     min-height: 90vh;
   }
@@ -233,6 +248,12 @@
   }
   .w-20 {
     width: calc(var(--spacing) * 20);
+  }
+  .w-\[20vw\] {
+    width: 20vw;
+  }
+  .w-\[30vw\] {
+    width: 30vw;
   }
   .w-\[40vw\] {
     width: 40vw;
@@ -249,8 +270,14 @@
   .min-w-screen {
     min-width: 100vw;
   }
+  .border-collapse {
+    border-collapse: collapse;
+  }
   .cursor-pointer {
     cursor: pointer;
+  }
+  .resize {
+    resize: both;
   }
   .resize-none {
     resize: none;
@@ -321,6 +348,21 @@
   .bg-white {
     background-color: var(--color-white);
   }
+  .bg-win-gray {
+    background-color: var(--color-win-gray);
+  }
+  .bg-win-gray\/50 {
+    background-color: var(--color-win-gray);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-win-gray) 50%, transparent);
+    }
+  }
+  .bg-win-gray\/80 {
+    background-color: var(--color-win-gray);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-win-gray) 80%, transparent);
+    }
+  }
   .bg-linear-to-r {
     --tw-gradient-position: to right;
     @supports (background-image: linear-gradient(in lab, red, red)) {
@@ -390,6 +432,22 @@
   }
   .opacity-0 {
     opacity: 0%;
+  }
+  .opacity-0\.5 {
+    opacity: 0.5%;
+  }
+  .opacity-60 {
+    opacity: 60%;
+  }
+  .opacity-70 {
+    opacity: 70%;
+  }
+  .opacity-\[80\%\] {
+    opacity: 80%;
+  }
+  .outline {
+    outline-style: var(--tw-outline-style);
+    outline-width: 1px;
   }
   .hover\:bg-blue {
     &:hover {
@@ -469,6 +527,11 @@ input, textarea {
   syntax: "*";
   inherits: false;
 }
+@property --tw-outline-style {
+  syntax: "*";
+  inherits: false;
+  initial-value: solid;
+}
 @layer properties {
   @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
     *, ::before, ::after, ::backdrop {
@@ -483,6 +546,7 @@ input, textarea {
       --tw-gradient-via-position: 50%;
       --tw-gradient-to-position: 100%;
       --tw-font-weight: initial;
+      --tw-outline-style: solid;
     }
   }
 }
