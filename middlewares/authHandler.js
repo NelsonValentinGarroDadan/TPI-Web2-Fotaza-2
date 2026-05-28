@@ -6,6 +6,7 @@ const AuthHandler = (req, res, next) => {
           try {
               const payload = verify(token);
               req.user = payload;
+              res.locals.user = payload;
           } catch { }
     }
     next();

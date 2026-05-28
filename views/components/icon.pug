@@ -1,0 +1,15 @@
+mixin icon(name, classes)
+    span(class=(classes || "") + " inline-block")
+        case name
+            when "house"
+                include ../../public/icons/house-bold.svg
+            when "magnifying-glass"
+                include ../../public/icons/magnifying-glass-bold.svg
+            when "upload"
+                include ../../public/icons/upload-simple-bold.svg
+            when "squares-four"
+                include ../../public/icons/squares-four-bold.svg
+            when "bell"
+                include ../../public/icons/bell-bold.svg
+            when "user"
+                include ../../public/icons/user-bold.svg

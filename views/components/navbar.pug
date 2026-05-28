@@ -1,0 +1,63 @@
+include ./icon.pug
+include ./win-border.pug
+
+mixin navbar
+    -
+        const links = [
+            { icon: "house",            label: "Para ti",        href: "/" },
+            { icon: "magnifying-glass", label: "Explorar",       href: "/search" },
+            { icon: "upload",           label: "Compartir",      href: "/upload" },
+            { icon: "squares-four",     label: "Colecciones",    href: "/colections" },
+            { icon: "bell",             label: "Notificaciones", href: "/notifications" },
+            { icon: "user",             label: "Perfil",         href: "/profile" },
+        ] 
+        const classNormalLink= "text-black hover:text-white hover:bg-win-gray/50 border-2 border-transparent hover:border-black"
+        const classActiveLink= "text-white bg-win-gray/40  hover:bg-win-gray/50"
+    section(class="bg-white p-4 flex flex-col xl:flex-row items-center justify-between gap-4 xl:gap-0 w-full border-b-2 border-black")
+        a(
+            class="xl:flex items-center justify-center gap-2 hidden " 
+            href="#"
+        )
+            img(
+                src="/icons/camera.svg"
+                class="w-10 h-10 p-1 bg-blue border-2 border-black"
+            )
+            p(class="text-xl text-black font-bold") Fotaza 2
+        nav(class="flex items-center gap-1")
+            each link in links
+                if(link.href == currentPath)
+                    +winBorder
+                        a(
+                            href=link.href
+                            class=`flex flex-col items-center gap-1  py-1 px-3 ${classActiveLink}`
+                        )
+                            +icon(link.icon, "w-6 h-6")
+                            span(class="text-xs") #{link.label}
+                else 
+                    a(
+                        href=link.href
+                        class=`flex flex-col items-center gap-1  py-1 px-3 ${classNormalLink}`
+                    )
+                        +icon(link.icon, "w-6 h-6")
+                        span(class="text-xs") #{link.label}
+
+        div(class="flex items-center justify-center gap-2")
+            if(user)
+                +winBorder()
+                    button(
+                        class="px-3 py-2 bg-win-gray/30 hover:bg-win-gray/50 text-sm text-black cursor-pointer"
+                        id="btn-logout"
+                    ) Cerrar Sesion
+            else
+                +winBorder()
+                    a(
+                        class="px-3 py-2 bg-win-gray/30 hover:bg-win-gray/50 text-sm text-black"
+                        href="/autentication/login"
+                    ) Iniciar Sesion
+            
+                a(
+                    class="px-3 py-1 bg-blue/80 hover:bg-blue text-sm text-white border-2 border-black"
+                    href="/autentication/login"
+                ) Registrarse
+
+        script(src="/js/auth/logout.js") 

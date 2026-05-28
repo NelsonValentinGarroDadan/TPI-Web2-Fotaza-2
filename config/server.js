@@ -14,6 +14,11 @@ app.use(cookieParser());
 app.use(express.static('public'));
 app.use(AuthHandler);
 
+app.use((req, res, next) => {
+      res.locals.currentPath = req.path;
+      next();
+  });
+
 app.set('view engine', 'pug');
 
 app.set(
