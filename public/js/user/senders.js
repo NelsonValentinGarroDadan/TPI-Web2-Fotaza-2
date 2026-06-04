@@ -1,7 +1,7 @@
 export const sendUpdateProfile = async (data) => {
     try {
         const res = await fetch("/profile", {
-            method: "PATCH",
+            method: "PUT",
             credentials: "include",
             body: data
         });

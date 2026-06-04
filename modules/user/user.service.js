@@ -6,8 +6,7 @@ module.exports = {
         const user = await userRepository.getProfileById(id);
 
         if (!user) throw new AppError(404, "Usuario no encontrado");
-
-        // mixins generados por las asociaciones belongsToMany de User
+ 
         const [followers, following] = await Promise.all([
             user.countFollowers(),
             user.countFollowing(),

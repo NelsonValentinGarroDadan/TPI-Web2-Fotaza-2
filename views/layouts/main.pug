@@ -5,7 +5,16 @@ html(lang="en")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         link(rel="stylesheet", href="/css/output.css")
         title Fotaza 2
-    body(class="bg-bk min-h-screen min-w-screen font-sans antialiased relative")
+    body(
+        class="bg-bk min-h-screen min-w-screen font-sans antialiased relative"
+        data-toast=(toast || undefined)
+        data-toast-type=toastType
+    )
         block content
 
         footer(class="absolute bottom-0 left-0 w-full flex items-center justify-center text-sm text-black opacity-60") Fotaza 2 - Not affiliated with any big tech company
+
+        script(type="module").
+            import { showToast } from "/js/helpers/toast.js";
+            const msg = document.body.dataset.toast;
+            if (msg) showToast(msg, document.body.dataset.toastType || "info");

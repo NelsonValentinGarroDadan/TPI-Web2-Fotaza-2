@@ -3,7 +3,13 @@ const authService = require("./auth.service.js");
 
 module.exports = {
     loginRednderView: (req, res) => {
-        res.render("auth/login.pug")
+        const messages = {
+            auth: "Necesitas iniciar sesion para acceder a esa pagina.",
+            expired: "Tu sesion expiro, volve a iniciar sesion.",
+        };
+        const toast = messages[req.query.reason] || null;
+
+        res.render("auth/login.pug", { toast, toastType: "error" });
     },
     registerRenderView: (req, res) => {
         res.render("auth/register.pug")

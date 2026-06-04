@@ -15,7 +15,9 @@ app.use(express.static('public'));
 app.use(AuthHandler);
 
 app.use((req, res, next) => {
-      res.locals.currentPath = req.path;
+      res.locals.currentPath = req.path;  
+      res.locals.toast = req.query.toast || null;
+      res.locals.toastType = req.query.toastType || "info";
       next();
   });
 
