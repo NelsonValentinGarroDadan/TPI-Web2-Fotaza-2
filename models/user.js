@@ -10,7 +10,20 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      // usuarios que ESTE usuario sigue (lo que cuenta como "seguidos")
+      User.belongsToMany(models.User, {
+        through: 'Followers',
+        as: 'following',
+        foreignKey: 'follower_id',
+        otherKey: 'followed_id',
+      });
+      // usuarios que siguen a ESTE usuario (sus "seguidores")
+      User.belongsToMany(models.User, {
+        through: 'Followers',
+        as: 'followers',
+        foreignKey: 'followed_id',
+        otherKey: 'follower_id',
+      });
     }
   }
   User.init({
