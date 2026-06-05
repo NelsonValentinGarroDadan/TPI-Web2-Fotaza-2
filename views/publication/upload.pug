@@ -1,10 +1,11 @@
 extend ../layouts/app.pug
 include ../components/win-border.pug
 include ../components/icon.pug
+include ../components/publicationView.pug
 
 block app
-    section(class="flex flex-col items-center justify-start w-full py-8 px-4")
-        div(class="w-[90vw] max-w-3xl bg-white border-2 border-black mb-10")
+    section(class="flex flex-col xl:flex-row xl:items-start xl:justify-center gap-6 w-full py-8 px-4")
+        div(class="w-full xl:w-[38%] xl:max-w-xl shrink-0 bg-white border-2 border-black")
 
             div(class="flex items-center gap-2 bg-linear-to-r from-blue to-blue-l px-3 py-1")
                 span(class="text-white")
@@ -35,6 +36,12 @@ block app
                 span#images-error(class="block text-red-500 text-sm h-4")
 
                 div#previews(class="hidden flex flex-col gap-2")
+
+                button(
+                    type="button"
+                    id="btn-add-more"
+                    class="hidden self-start text-sm text-blue-l hover:text-blue underline cursor-pointer"
+                ) + Agregar mas imagenes
 
                 div(class="flex flex-col gap-1")
                     label(for="title" class="text-sm text-black") Titulo
@@ -86,6 +93,10 @@ block app
                             href="/"
                             class="block px-6 py-2 bg-win-gray/30 hover:bg-win-gray/50 text-black text-sm"
                         ) Cancelar
+
+        div(class="w-full xl:flex-1 xl:max-w-4xl")
+            h2(class="text-black font-bold mb-3 text-lg") Vista previa
+            +publicationView({ author: author }, true)
 
         script(src="/js/helpers/errors.js" type="module")
         script(src="/js/publication/upload.js" type="module")

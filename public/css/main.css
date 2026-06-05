@@ -21,7 +21,35 @@
 }
  
   
-input, 
+input,
 textarea{
     outline: none;
+}
+
+*{
+    scrollbar-color: var(--color-win-gray-l) var(--primary-bk);
+}
+
+::-webkit-scrollbar{
+    width: 16px;
+    height: 16px;
+}
+
+::-webkit-scrollbar-track{
+    background: var(--primary-bk);
+    border-left: 1px solid var(--color-win-gray);
+}
+
+::-webkit-scrollbar-thumb{
+    background: var(--color-win-gray-l);
+    border: 2px solid;
+    border-color: #ffffff var(--color-win-gray) var(--color-win-gray) #ffffff;
+}
+
+::-webkit-scrollbar-thumb:hover{
+    background: #d6d6d6;
+}
+
+::-webkit-scrollbar-corner{
+    background: var(--primary-bk);
 }

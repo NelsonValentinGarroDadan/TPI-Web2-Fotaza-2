@@ -1,0 +1,84 @@
+include ./win-border.pug
+
+mixin pvSection(title)
+    div(class="bg-white border-2 border-black")
+        div(class="bg-linear-to-r from-blue to-blue-l px-3 py-1")
+            h3(class="text-white font-bold text-sm")= title
+        div(class="p-4")
+            block
+
+mixin publicationView(pub, preview)
+    -
+        const images = (pub.images || []).map((i) => (typeof i === "string" ? i : (i.url_markwater || i.url)))
+        const tags = pub.tags || []
+        const comments = pub.comments || []
+        const author = pub.author || {}
+    div(class="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full")
+
+        div(class="lg:col-span-2 flex flex-col gap-4")
+
+            div(class="bg-white border-2 border-black")
+                div(class="bg-linear-to-r from-blue to-blue-l px-3 py-1")
+                    h2(class="text-white font-bold text-sm" data-pv-title) #{pub.title || "Titulo de la publicacion"}
+                div(class="relative flex items-center justify-center bg-win-gray-l/30 min-h-[18rem]" data-pv-carousel)
+                    p(data-pv-empty class=(images.length ? "hidden " : "") + "text-win-gray text-sm") Sin imagenes
+                    img(data-pv-image src=(images[0] || "") alt="" class=(images.length ? "" : "hidden ") + "w-full max-h-[28rem] object-contain")
+                    button(type="button" data-pv-prev class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white border-2 border-black text-black text-lg leading-none cursor-pointer") ‹
+                    button(type="button" data-pv-next class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white border-2 border-black text-black text-lg leading-none cursor-pointer") ›
+                    span(data-pv-watermark class="hidden absolute bottom-6 right-3 text-white text-xl font-bold opacity-80 pointer-events-none [text-shadow:1px_1px_2px_rgba(0,0,0,0.7)]")
+                    span(data-pv-counter class="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-0.5")
+
+            if !preview
+                div(class="bg-white border-2 border-black")
+                    div(class="bg-linear-to-r from-blue to-blue-l px-3 py-1")
+                        h3(class="text-white font-bold text-sm") Comentarios (#{comments.length})
+                    div(class="p-4 flex flex-col gap-3")
+                        +winBorder("w-full")
+                            textarea(class="w-full h-20 resize-none text-sm text-black px-2 py-1" placeholder="Escribi un comentario...")
+                        div(class="flex justify-end")
+                            +winBorder()
+                                button(type="button" class="px-4 py-1 bg-win-gray/30 hover:bg-win-gray/50 text-sm text-black cursor-pointer") Comentar
+                        each c in comments
+                            div(class="bg-win-gray-l/30 border border-win-gray p-2")
+                                div(class="flex items-center justify-between")
+                                    span(class="text-sm font-bold text-black") @#{c.author}
+                                    span(class="text-xs text-black opacity-60")= c.date
+                                p(class="text-sm text-black")= c.content
+
+        div(class="flex flex-col gap-4")
+
+            if !preview
+                +pvSection("Autor")
+                    div(class="flex items-center gap-3")
+                        img(
+                            src=(author.profile_img || "/imgs/profile_img_default.png")
+                            alt="Foto de perfil"
+                            class="w-12 h-12 object-cover border-2 border-black"
+                        )
+                        div(class="flex flex-col")
+                            span(class="text-sm font-bold text-black") @#{author.nickname || "usuario"}
+                            if author.id
+                                a(href=`/profile/${author.id}` class="text-xs text-blue-l hover:text-blue underline") Ver perfil
+
+            +pvSection("Descripcion")
+                p(class="text-sm text-black opacity-80 whitespace-pre-line mb-3" data-pv-description) #{pub.description || "Sin descripcion"}
+                div(class="flex flex-wrap gap-2" data-pv-tags)
+                    each tag in tags
+                        span(class="px-2 py-0.5 text-xs text-black bg-win-gray-l/40 border border-black") ##{tag}
+
+            if !preview
+                +pvSection("Calificacion")
+                    div(class="flex items-center gap-2 mb-2")
+                        span(class="text-yellow-500 text-lg leading-none") ★★★★☆
+                        span(class="text-sm font-bold text-black")= pub.rating || 0
+                        span(class="text-xs text-black opacity-60") (#{pub.ratingsCount || 0} calificaciones)
+                    p(class="text-sm text-black mb-1") Califica esta foto:
+                    div(class="text-2xl text-win-gray leading-none cursor-pointer") ☆☆☆☆☆
+
+            if !preview
+                +winBorder("w-full")
+                    button(
+                        type="button"
+                        data-pv-interest
+                        class="w-full px-4 py-2 bg-win-gray/20 hover:bg-win-gray/40 text-sm text-black cursor-pointer"
+                    ) Me interesa obtenerla
