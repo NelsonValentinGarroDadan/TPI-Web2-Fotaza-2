@@ -1,5 +1,4 @@
-include ./icon.pug
-include ./win-border.pug
+include ./navItem.pug
 
 mixin navbar
     -
@@ -7,12 +6,9 @@ mixin navbar
             { icon: "house",            label: "Para ti",        href: "/" },
             { icon: "magnifying-glass", label: "Explorar",       href: "/search" },
             { icon: "upload",           label: "Compartir",      href: "/upload" },
-            { icon: "squares-four",     label: "Colecciones",    href: "/colections" },
             { icon: "bell",             label: "Notificaciones", href: "/notifications" },
             { icon: "user",             label: "Perfil",         href: "/profile" },
-        ] 
-        const classNormalLink= "text-black hover:text-white hover:bg-win-gray/50 border-2 border-transparent hover:border-black"
-        const classActiveLink= "text-white bg-win-gray/40  hover:bg-win-gray/50"
+        ]
     section(class="bg-white p-4 flex flex-col xl:flex-row items-center justify-between gap-4 xl:gap-0 w-full border-b-2 border-black")
         a(
             class="xl:flex items-center justify-center gap-2 hidden " 
@@ -25,21 +21,8 @@ mixin navbar
             p(class="text-xl text-black font-bold") Fotaza 2
         nav(class="flex items-center gap-1")
             each link in links
-                if(link.href == currentPath)
-                    +winBorder
-                        a(
-                            href=link.href
-                            class=`flex flex-col items-center gap-1  py-1 px-3 ${classActiveLink}`
-                        )
-                            +icon(link.icon, "w-6 h-6")
-                            span(class="text-xs") #{link.label}
-                else 
-                    a(
-                        href=link.href
-                        class=`flex flex-col items-center gap-1  py-1 px-3 ${classNormalLink}`
-                    )
-                        +icon(link.icon, "w-6 h-6")
-                        span(class="text-xs") #{link.label}
+                a(href=link.href)
+                    +navItem(link.label, link.icon, link.label, link.href == currentPath, true)
 
         div(class="flex items-center justify-center gap-2")
             if(user)
