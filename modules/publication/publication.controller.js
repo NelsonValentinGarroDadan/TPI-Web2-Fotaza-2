@@ -8,6 +8,12 @@ module.exports = {
         res.render("publication/upload.pug", { author });
     },
 
+    myPublications: async (req, res) => {
+        const publications = await publicationService.getUserPublications(req.user.id);
+
+        res.status(200).send({ publications });
+    },
+
     createPublication: async (req, res) => {
         let meta = [];
         try {

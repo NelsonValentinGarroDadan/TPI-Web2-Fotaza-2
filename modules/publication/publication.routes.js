@@ -12,6 +12,8 @@ const upload = multer({
 
 publicationRoutes.get("/", requireAuthPage("auth"), publicationController.uploadRenderView);
 
+publicationRoutes.get("/mine", requireAuth, publicationController.myPublications);
+
 publicationRoutes.post("/", requireAuth, upload.array("images", 10), publicationController.createPublication);
 
 module.exports = publicationRoutes;

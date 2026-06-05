@@ -41,6 +41,17 @@ const parseTags = (raw) => [
 ];
 
 module.exports = {
+    getUserPublications: async (userId) => {
+        const publications = await publicationRepository.getPublicationsByUser(userId);
+
+        return publications.map((p) => ({
+            id: p.id,
+            title: p.title,
+            cover: p.images?.[0]?.url || null,
+            imageCount: p.images?.length || 0,
+        }));
+    },
+
     createPublication: async (userId, { title, description, tags }, files, meta) => {
         if (!title?.trim()) throw new AppError(400, "El titulo es obligatorio.");
         if (!files?.length) throw new AppError(400, "Subi al menos una imagen.");
