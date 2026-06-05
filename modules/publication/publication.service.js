@@ -1,3 +1,4 @@
+const sharp = require("sharp");
 const { sequelize } = require("../../models");
 const cloudinary = require("../../config/cloudinary");
 const publicationRepository = require("./publication.repository");
@@ -12,20 +13,28 @@ const uploadBuffer = (buffer) =>
         stream.end(buffer);
     });
 
-const watermarkUrl = (publicId, text) =>
-    cloudinary.url(publicId, {
-        secure: true,
-        transformation: [
-            {
-                overlay: { font_family: "Arial", font_size: 60, text },
-                color: "white",
-                opacity: 60,
-                gravity: "south_east",
-                x: 20,
-                y: 20,
-            },
-        ],
-    });
+const escapeXml = (text) =>
+    text.replace(/[<>&'"]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" }[c]));
+
+const signBuffer = async (buffer, text) => {
+    const image = sharp(buffer);
+    const { width = 800, height = 600 } = await image.metadata();
+
+    const fontSize = Math.max(18, Math.round(width / 25));
+    const pad = Math.round(fontSize * 0.6);
+    const stroke = Math.max(1, Math.round(fontSize / 14));
+
+    const svg = `<svg width="${width}" height="${height}">
+        <text x="${width - pad}" y="${height - pad}" text-anchor="end"
+            font-family="Arial, sans-serif" font-size="${fontSize}" font-weight="bold"
+            fill="#ffffff" fill-opacity="0.85"
+            stroke="#000000" stroke-opacity="0.6" stroke-width="${stroke}" paint-order="stroke">${escapeXml(text)}</text>
+    </svg>`;
+
+    return image
+        .composite([{ input: Buffer.from(svg), top: 0, left: 0 }])
+        .toBuffer();
+};
 
 const parseTags = (raw) => [
     ...new Set((raw || "").split(",").map((t) => t.trim().toLowerCase()).filter(Boolean)),
@@ -39,7 +48,23 @@ module.exports = {
         const tagNames = parseTags(tags);
         if (!tagNames.length) throw new AppError(400, "Agrega al menos una etiqueta.");
 
-        const uploads = await Promise.all(files.map((file) => uploadBuffer(file.buffer)));
+        const prepared = [];
+
+        for (let i = 0; i < files.length; i++) {
+            const info = meta[i] || {};
+            const copyright = info.license === "copyright";
+            const text = copyright && info.watermark ? info.watermark.trim() : null;
+
+            const buffer = text ? await signBuffer(files[i].buffer, text) : files[i].buffer;
+            const up = await uploadBuffer(buffer);
+
+            prepared.push({
+                url: up.secure_url,
+                text_markwater: text,
+                license: copyright ? "copyright" : "sin_copyright",
+                order_number: i,
+            });
+        }
 
         return sequelize.transaction(async (transaction) => {
             const publication = await publicationRepository.createPublication(
@@ -51,22 +76,11 @@ module.exports = {
                 tagNames.map((name) => publicationRepository.findOrCreateTag(name, transaction))
             );
 
-            for (let i = 0; i < uploads.length; i++) {
-                const up = uploads[i];
-                const info = meta[i] || {};
-                const copyright = info.license === "copyright";
-
+            for (const data of prepared) {
                 const image = await publicationRepository.createImage(
-                    {
-                        publication_id: publication.id,
-                        url: up.secure_url,
-                        url_markwater: copyright && info.watermark ? watermarkUrl(up.public_id, info.watermark) : null,
-                        order_number: i,
-                        license: copyright ? "copyright" : "sin_copyright",
-                    },
+                    { publication_id: publication.id, ...data },
                     transaction
                 );
-
                 await image.addTags(tagInstances, { transaction });
             }
 

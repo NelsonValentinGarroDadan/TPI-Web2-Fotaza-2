@@ -9,7 +9,8 @@ mixin pvSection(title)
 
 mixin publicationView(pub, preview)
     -
-        const images = (pub.images || []).map((i) => (typeof i === "string" ? i : (i.url_markwater || i.url)))
+        const imgs = (pub.images || []).map((i) => (typeof i === "string" ? { url: i } : i))
+        const firstImg = imgs[0] || {}
         const tags = pub.tags || []
         const comments = pub.comments || []
         const author = pub.author || {}
@@ -21,8 +22,8 @@ mixin publicationView(pub, preview)
                 div(class="bg-linear-to-r from-blue to-blue-l px-3 py-1")
                     h2(class="text-white font-bold text-sm" data-pv-title) #{pub.title || "Titulo de la publicacion"}
                 div(class="relative flex items-center justify-center bg-win-gray-l/30 min-h-[18rem]" data-pv-carousel)
-                    p(data-pv-empty class=(images.length ? "hidden " : "") + "text-win-gray text-sm") Sin imagenes
-                    img(data-pv-image src=(images[0] || "") alt="" class=(images.length ? "" : "hidden ") + "w-full max-h-[28rem] object-contain")
+                    p(data-pv-empty class=(imgs.length ? "hidden " : "") + "text-win-gray text-sm") Sin imagenes
+                    img(data-pv-image src=(firstImg.url || "") alt="" class=(imgs.length ? "" : "hidden ") + "w-full max-h-[28rem] object-contain")
                     button(type="button" data-pv-prev class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white border-2 border-black text-black text-lg leading-none cursor-pointer") ‹
                     button(type="button" data-pv-next class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white border-2 border-black text-black text-lg leading-none cursor-pointer") ›
                     span(data-pv-watermark class="hidden absolute bottom-6 right-3 text-white text-xl font-bold opacity-80 pointer-events-none [text-shadow:1px_1px_2px_rgba(0,0,0,0.7)]")

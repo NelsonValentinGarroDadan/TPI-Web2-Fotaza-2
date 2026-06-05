@@ -12,7 +12,7 @@ module.exports = {
         onDelete: 'CASCADE',
       },
       url: { allowNull: false, type: Sequelize.STRING },
-      url_markwater: { type: Sequelize.STRING },
+      text_markwater: { type: Sequelize.STRING },
       order_number: { allowNull: false, type: Sequelize.INTEGER },
       license: { allowNull: false, type: Sequelize.STRING, defaultValue: 'sin_copyright' },
       createdAt: { allowNull: false, type: Sequelize.DATE },
