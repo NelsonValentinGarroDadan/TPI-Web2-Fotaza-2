@@ -1,4 +1,4 @@
-const requireAuthPage = (redirectTo = "/autentication/login",reason) => (req, res, next) => {
+const requireAuthPage = (reason = "auth", redirectTo = "/autentication/login") => (req, res, next) => {
     if (!req.user) return res.redirect(`${redirectTo}?reason=${reason}`);
     next();
 };

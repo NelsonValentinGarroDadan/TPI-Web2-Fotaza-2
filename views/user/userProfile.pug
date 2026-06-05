@@ -1,0 +1,48 @@
+extend ../layouts/app.pug
+include ../components/navItem.pug
+
+block app
+    section(class="flex flex-col items-center justify-start w-full py-8 px-4")
+        div(class="flex items-start justify-start gap-4 p-6 w-[90vw] bg-white border-2 border-black")
+
+            div(class="relative block w-40 h-40 shrink-0")
+                img(
+                    src=(profile.profile_img || "/imgs/profile_img_default.png")
+                    alt="Foto de perfil"
+                    class="w-40 h-40 object-cover bg-win-gray-l/60 border-3 border-black p-1"
+                )
+
+            div(class="flex flex-col items-start justify-start w-full gap-1")
+                div(class="relative w-full flex flex-col gap-3")
+
+                    div(class="absolute right-0 top-0")
+                        +winBorder()
+                            button(
+                                type="button"
+                                id="btn-follow"
+                                data-id=profile.id
+                                data-following=String(profile.isFollowing)
+                                class=`px-4 py-2 text-sm cursor-pointer ${profile.isFollowing ? "bg-win-gray/30 hover:bg-win-gray/50 text-black" : "bg-blue-l hover:bg-blue text-white border border-black"}`
+                            )= profile.isFollowing ? "Siguiendo" : "Seguir"
+
+                    div(class="w-full max-w-md flex flex-col pr-36")
+                        p(class="text-2xl font-bold text-black px-1 py-1") #{profile.nickname}
+
+                    div(class="w-full max-w-md flex flex-col")
+                        p(class="text-sm text-black opacity-80 whitespace-pre-line px-1 py-1") #{profile.biography || "Este usuario todavia no escribio una biografia."}
+
+                div(class="w-full flex items-center gap-5 bg-win-gray-l/60 p-4 border-2 border-win-gray-l/30")
+                    div(class="flex flex-col items-center")
+                        span#followers-count(class="text-xl font-bold text-black") #{profile.followers}
+                        span(class="text-xs text-black opacity-70") Seguidores
+                    div(class="flex flex-col items-center")
+                        span(class="text-xl font-bold text-black") #{profile.following}
+                        span(class="text-xs text-black opacity-70") Seguidos
+
+        div(class="w-[90vw] flex items-stretch gap-1 mt-4")
+            +navItem("btn-publications", "app-window", "Publicaciones", true, false, null, null, "px-5")
+
+        div#tab-content(class="w-[90vw] mt-2")
+
+    script(src="/js/user/follow.js" type="module")
+    script(src="/js/user/userProfile.js" type="module")

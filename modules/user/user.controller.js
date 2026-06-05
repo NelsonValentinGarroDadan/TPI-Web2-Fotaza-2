@@ -9,6 +9,29 @@ module.exports = {
         res.render("user/profile.pug", { profile });
     },
 
+    userProfileRenderView: async (req, res) => {
+        const targetId = Number(req.params.id);
+
+        if (!Number.isInteger(targetId) || targetId === req.user.id)
+            return res.redirect("/profile");
+
+        const profile = await userService.getPublicProfile(targetId, req.user.id);
+
+        res.render("user/userProfile.pug", { profile });
+    },
+
+    follow: async (req, res) => {
+        const result = await userService.follow(req.user.id, Number(req.params.id));
+
+        res.status(200).send({ ...result, message: "Ahora seguis a este usuario." });
+    },
+
+    unfollow: async (req, res) => {
+        const result = await userService.unfollow(req.user.id, Number(req.params.id));
+
+        res.status(200).send({ ...result, message: "Dejaste de seguir a este usuario." });
+    },
+
     updateProfile: async (req, res) => {
         const profile = await userService.updateProfile(req.user.id, {
             ...req.body,

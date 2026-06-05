@@ -17,4 +17,9 @@ userRoutes.put(
     userController.updateProfile
 );
 
+userRoutes.get("/:id", requireAuthPage("auth"), userController.userProfileRenderView);
+
+userRoutes.post("/:id/follow", requireAuth, userController.follow);
+userRoutes.delete("/:id/follow", requireAuth, userController.unfollow);
+
 module.exports = userRoutes;

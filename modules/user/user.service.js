@@ -15,6 +15,38 @@ module.exports = {
         return { ...user.toJSON(), followers, following };
     },
 
+    getPublicProfile: async (targetId, viewerId) => {
+        const user = await userRepository.getProfileById(targetId);
+
+        if (!user) throw new AppError(404, "Usuario no encontrado");
+
+        const [followers, following, isFollowing] = await Promise.all([
+            user.countFollowers(),
+            user.countFollowing(),
+            userRepository.isFollowing(viewerId, targetId),
+        ]);
+
+        return { ...user.toJSON(), followers, following, isFollowing };
+    },
+
+    follow: async (viewerId, targetId) => {
+        if (viewerId === targetId) throw new AppError(400, "No podes seguirte a vos mismo.");
+
+        const target = await userRepository.getProfileById(targetId);
+        if (!target) throw new AppError(404, "Usuario no encontrado");
+
+        const already = await userRepository.isFollowing(viewerId, targetId);
+        if (!already) await userRepository.follow(viewerId, targetId);
+
+        return { isFollowing: true };
+    },
+
+    unfollow: async (viewerId, targetId) => {
+        await userRepository.unfollow(viewerId, targetId);
+
+        return { isFollowing: false };
+    },
+
     updateProfile: async (id, data) => {
         const fields = {};
 
