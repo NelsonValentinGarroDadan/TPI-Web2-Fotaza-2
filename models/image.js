@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
       references: { model: 'Publications', key: 'id' },
     },
     url: { type: DataTypes.STRING, allowNull: false },
-    url_markwater: DataTypes.STRING,
+    text_markwater: DataTypes.STRING,
     order_number: { type: DataTypes.INTEGER, allowNull: false },
     license: { type: DataTypes.STRING, allowNull: false, defaultValue: 'sin_copyright' },
   }, {
