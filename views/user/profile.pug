@@ -1,11 +1,13 @@
 extend ../layouts/app.pug
 include ../components/navItem.pug
+include ../components/publicationCard.pug
+include ../components/publicationModal.pug
 
 block app
     section(class="flex flex-col items-center justify-start w-full py-8 px-4")
         form(
             id="form-profile"
-            class="flex flex-col sm:flex-row items-start justify-start gap-4 p-6 w-[90vw] bg-white border-2 border-black"
+            class="flex flex-col sm:flex-row items-start justify-start gap-4 p-6 w-[70vw] bg-white border-2 border-black"
         )
 
             label(for="profile_img" class="relative block w-40 h-40 shrink-0")
@@ -96,11 +98,23 @@ block app
 
                 div#form-error(class="text-red-500 text-sm w-full text-center h-4")
 
-        div(class="w-[90vw] flex items-stretch gap-1 mt-4")
+        div(class="w-[70vw] flex items-stretch gap-1 mt-4")
             +navItem("btn-publications", "app-window", "Publicaciones", true, false, null, null, "px-5")
             +navItem("btn-collection", "squares-four", "Coleccion", false, false, null, null, "px-5")
 
-        div#tab-content(class="w-[90vw] mt-2")
+        div#tab-content(class="w-[70vw] mt-2")
+            div#panel-publications
+                if !publications || !publications.length
+                    p(class="text-sm text-black opacity-60 p-4") Todavia no tenes publicaciones.
+                else
+                    div(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4")
+                        each pub in publications
+                            +publicationCard(pub, profile, true)
+
+            div#panel-collection(class="hidden")
+                p(class="text-sm text-black opacity-60 p-4") Todavia no tenes colecciones.
+
+    +publicationModal()
 
     script(src="/js/helpers/errors.js" type="module")
     script(src="/js/helpers/validator.js" type="module")
@@ -108,3 +122,4 @@ block app
     script(src="/js/user/senders.js" type="module")
     script(src="/js/user/profile.js" type="module")
     script(src="/js/user/profileTabs.js" type="module")
+    script(src="/js/publication/publicationModal.js" type="module")

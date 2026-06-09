@@ -1,0 +1,60 @@
+include ./win-border.pug
+include ./icon.pug
+
+mixin publicationCard(pub, author, owner)
+    -
+        const imgs = (pub.images || []).map((i) => (typeof i === "string" ? { url: i } : i))
+        const cover = imgs[0] || {}
+        const rating = pub.rating || 0
+        const fullStars = Math.round(rating)
+        const commentsCount = (pub.comments || []).length
+        const modalData = {
+            title: pub.title,
+            description: pub.description,
+            tags: pub.tags || [],
+            images: imgs.map((i) => i.url),
+            author: { nickname: author.nickname, profile_img: author.profile_img, id: author.id },
+            rating,
+            ratingsCount: pub.ratingsCount || 0,
+        }
+
+    div(data-pub data-owner=String(!!owner) data-publication=JSON.stringify(modalData) class="relative")
+
+        button(
+            type="button"
+            data-card
+            class="group w-full text-left bg-white border-2 border-black cursor-pointer h-[50vh] flex flex-col overflow-hidden"
+        )
+
+            div(class="shrink-0 bg-linear-to-r from-blue to-blue-l px-3 py-1")
+                h3(class="text-white font-bold text-sm truncate")= pub.title || "Publicacion"
+
+            div(class="flex-1 min-h-0 bg-win-gray-l/40 overflow-hidden flex items-center justify-center")
+                img(src=cover.url alt=(pub.title || "") class="w-full h-full object-contain transition-none group-hover:scale-105")
+
+            div(class="shrink-0 p-3 flex flex-col gap-2")
+
+                div(class="flex flex-col min-w-0")
+                    span(class="text-black font-bold text-sm truncate")= pub.title || "Publicacion"
+                    if !owner
+                        span(class="text-xs text-blue-l truncate") by #{author.nickname || "usuario"}
+
+                div(class="flex items-center gap-2")
+                    span(class="text-yellow-500 text-lg leading-none")
+                        each _, i in [0, 1, 2, 3, 4]
+                            if i < fullStars
+                                | ★
+                            else
+                                | ☆
+                    span(class="text-xs text-black opacity-60") (#{rating})
+
+                div(class="border-t border-win-gray pt-2 flex items-stretch gap-2")
+                    +winBorder("flex-1")
+                        span(class="flex items-center justify-center gap-2 px-3 py-1 bg-win-gray/20 text-sm text-black w-full")
+                            svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4")
+                                path(d="M4 4h16v12H7l-3 3z")
+                            | #{commentsCount}
+                    if !owner
+                        +winBorder("flex-1")
+                            span(class="flex items-center justify-center px-3 py-1 bg-win-gray/20 text-red-500")
+                                +icon("flag", "w-4 h-4")

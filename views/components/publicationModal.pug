@@ -1,0 +1,68 @@
+include ./win-border.pug
+
+mixin pmSection(title)
+    div(class="bg-white border-2 border-black")
+        div(class="bg-linear-to-r from-blue to-blue-l px-3 py-1")
+            h3(class="text-white font-bold text-sm")= title
+        div(class="p-3")
+            block
+
+mixin publicationModal()
+    div(data-pub-modal class="hidden fixed inset-0 z-50 items-center justify-center p-4")
+        div(data-modal-backdrop class="absolute inset-0 bg-black/60")
+
+        div(class="relative w-[90vw] max-w-5xl h-[80vh] flex flex-col overflow-hidden bg-bk border-2 border-black")
+
+            div(class="w-full flex items-center justify-end bg-linear-to-r from-blue to-blue-l px-3 py-1")
+                button(
+                    type="button"
+                    data-modal-close
+                    class="flex items-center justify-centerw-5 h-5 bg-red-500 hover:bg-red-700 text-white border-2 border-black cursor-pointer py-2 px-1"
+                ) ✕
+
+            div(class="flex-1 min-h-0 flex flex-col lg:flex-row gap-4 p-4")
+
+                div(class="flex-1 min-h-0 flex flex-col gap-4")
+
+                    div(class="flex-1 min-h-0 relative flex items-center justify-center bg-win-gray-l/30 border-2 border-black")
+                        img(data-pv-image src="" alt="" class="max-w-full max-h-full object-contain")
+                        button(type="button" data-pv-prev class="hidden absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white border-2 border-black text-black text-lg leading-none cursor-pointer") ‹
+                        button(type="button" data-pv-next class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white border-2 border-black text-black text-lg leading-none cursor-pointer") ›
+                        span(data-pv-counter class="hidden absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-0.5")
+
+                    div(class="shrink-0 max-h-48 flex flex-col bg-white border-2 border-black")
+                        div(class="shrink-0 bg-linear-to-r from-blue to-blue-l px-3 py-1")
+                            h3(class="text-white font-bold text-sm") Comentarios (#[span(data-pv-comments-count) 0])
+                        div(class="p-3 flex flex-col gap-3 min-h-0")
+                            +winBorder("w-full shrink-0")
+                                textarea(class="w-full h-16 resize-none text-sm text-black px-2 py-1" placeholder="Escribi un comentario...")
+                            div(class="shrink-0 flex justify-end")
+                                +winBorder()
+                                    button(type="button" class="px-4 py-1 bg-win-gray/30 hover:bg-win-gray/50 text-sm text-black cursor-pointer") Comentar
+                            div(data-pv-comments class="flex flex-col gap-2 min-h-0 overflow-y-auto")
+
+                div(class="w-full lg:w-80 shrink-0 flex flex-col gap-3 min-h-0 overflow-y-auto")
+
+                    +pmSection("Autor")
+                        div(class="flex items-center gap-3")
+                            img(data-pv-author-img src="/imgs/profile_img_default.png" alt="Foto de perfil" class="w-12 h-12 object-cover border-2 border-black")
+                            div(class="flex flex-col")
+                                span(data-pv-author-name class="text-sm font-bold text-black") @usuario
+                                a(data-pv-profile-link data-hide-owner href="#" class="text-xs text-blue-l hover:text-blue underline") Ver perfil
+
+                    +pmSection("Descripcion")
+                        p(data-pv-description class="text-sm text-black opacity-80 whitespace-pre-line mb-3")
+                        div(data-pv-tags class="flex flex-wrap gap-2")
+
+                    +pmSection("Calificacion")
+                        div(class="flex items-center gap-2 mb-2")
+                            span(data-pv-stars class="text-yellow-500 text-lg leading-none") ☆☆☆☆☆
+                            span(data-pv-rating class="text-sm font-bold text-black") 0
+                            span(data-pv-rating-count class="text-xs text-black opacity-60") (0)
+                        div(data-hide-owner)
+                            p(class="text-sm text-black mb-1") Califica esta foto:
+                            div(data-pv-rate class="text-2xl text-win-gray leading-none cursor-pointer") ☆☆☆☆☆
+
+                    div(data-hide-owner)
+                        +winBorder("w-full")
+                            button(type="button" class="w-full px-4 py-2 bg-win-gray/20 hover:bg-win-gray/40 text-sm text-black cursor-pointer") Me interesa obtenerla

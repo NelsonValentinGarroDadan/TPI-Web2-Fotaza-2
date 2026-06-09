@@ -52,6 +52,27 @@ module.exports = {
         }));
     },
 
+    getUserPublicationsDetailed: async (userId) => {
+        const publications = await publicationRepository.getPublicationsByUser(userId);
+
+        return publications.map((p) => {
+            const images = (p.images || []).map((i) => ({ url: i.url }));
+            const tags = [
+                ...new Set((p.images || []).flatMap((i) => (i.tags || []).map((t) => t.title))),
+            ];
+
+            return {
+                id: p.id,
+                title: p.title,
+                description: p.description,
+                cover: images[0]?.url || null,
+                imageCount: images.length,
+                images,
+                tags,
+            };
+        });
+    },
+
     createPublication: async (userId, { title, description, tags }, files, meta) => {
         if (!title?.trim()) throw new AppError(400, "El titulo es obligatorio.");
         if (!files?.length) throw new AppError(400, "Subi al menos una imagen.");

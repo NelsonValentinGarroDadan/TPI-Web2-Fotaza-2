@@ -10,6 +10,12 @@ module.exports = {
                 attributes: ["url", "order_number"],
                 separate: true,
                 order: [["order_number", "ASC"]],
+                include: [{
+                    model: Tag,
+                    as: "tags",
+                    attributes: ["title"],
+                    through: { attributes: [] },
+                }],
             }],
             order: [["createdAt", "DESC"]],
         }),

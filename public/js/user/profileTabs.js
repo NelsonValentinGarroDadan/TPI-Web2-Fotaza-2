@@ -1,25 +1,29 @@
-import { renderPublications } from "./renderPublications.js";
 import { renderCollections } from "./renderCollections.js";
 
-const content = document.getElementById("tab-content");
-
 const tabs = [
-    { id: "btn-publications", render: renderPublications },
-    { id: "btn-collection", render: renderCollections },
+    { id: "btn-publications", panel: "panel-publications" },
+    { id: "btn-collection", panel: "panel-collection", render: renderCollections },
 ];
 
-const buttons = tabs.map((tab) => document.getElementById(tab.id));
-
 const setActive = (id) => {
-    tabs.forEach((tab, i) => {
+    tabs.forEach((tab) => {
+        const btn = document.getElementById(tab.id);
+        const panel = document.getElementById(tab.panel);
+        if (!btn || !panel) return;
+
         const on = tab.id === id;
-        buttons[i].classList.toggle("text-white", on);
-        buttons[i].classList.toggle("bg-win-gray/40", on);
-        buttons[i].classList.toggle("text-black", !on);
-        if (on) tab.render(content);
+        btn.classList.toggle("text-white", on);
+        btn.classList.toggle("bg-win-gray/40", on);
+        btn.classList.toggle("text-black", !on);
+        panel.classList.toggle("hidden", !on);
+
+        if (on && tab.render) tab.render(panel);
     });
 };
 
-tabs.forEach((tab, i) => buttons[i].addEventListener("click", () => setActive(tab.id)));
+tabs.forEach((tab) => {
+    const btn = document.getElementById(tab.id);
+    if (btn) btn.addEventListener("click", () => setActive(tab.id));
+});
 
 setActive("btn-publications");
