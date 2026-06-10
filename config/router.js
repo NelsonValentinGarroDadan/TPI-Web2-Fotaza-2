@@ -7,6 +7,7 @@ const router = Router();
 
 
 router.get("/", publicationController.homeRenderView);
+router.get("/foryou", publicationController.forYouRenderView);
 router.use("/autentication", authRoutes);
 router.use("/profile", userRoutes);
 router.use("/upload", publicationRoutes);

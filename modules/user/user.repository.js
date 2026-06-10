@@ -7,6 +7,13 @@ module.exports = {
 
     getUserByNickName: (nickname) => User.findOne({ where: { nickname } }),
 
+    getFollowingIds: async (userId) => {
+        const user = await User.findByPk(userId);
+        if (!user) return [];
+        const following = await user.getFollowing({ attributes: ["id"] });
+        return following.map((u) => u.id);
+    },
+
     isFollowing: async (followerId, followedId) => {
         const viewer = await User.findByPk(followerId);
         if (!viewer) return false;

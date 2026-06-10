@@ -3,11 +3,22 @@ const userRepository = require("../user/user.repository.js");
 
 module.exports = {
     homeRenderView: async (req, res) => {
-        const publications = req.user
-            ? await publicationService.getFollowingFeed(req.user.id, { viewerId: req.user.id })
-            : [];
+        if (!req.user) return res.redirect("/foryou");
+
+        const publications = await publicationService.getFollowingFeed(req.user.id, {
+            viewerId: req.user.id,
+        });
 
         res.render("home.pug", { publications });
+    },
+
+    forYouRenderView: async (req, res) => {
+        const publications = await publicationService.getForYouFeed({
+            authenticated: Boolean(req.user),
+            viewerId: req.user?.id,
+        });
+
+        res.render("foryou.pug", { publications });
     },
 
     uploadRenderView: async (req, res) => {

@@ -31,6 +31,7 @@ if (modal) {
     let index = 0;
     let currentData = null;
     let currentRoot = null;
+    let currentOwner = false;
     let selected = 0;
 
     const stars = (rating) => {
@@ -65,6 +66,24 @@ if (modal) {
         el.rate.addEventListener("mouseleave", () => paintRate(selected));
     }
 
+    const renderRating = (img, owner) => {
+        const rating = img.rating || 0;
+        el.stars.textContent = stars(rating);
+        el.rating.textContent = rating;
+        el.ratingCount.textContent = `(${img.ratingsCount || 0})`;
+
+        selected = 0;
+        paintRate(0);
+        if (el.rateConfirm) el.rateConfirm.classList.add("hidden");
+
+        const rated = Boolean(img.rated);
+        if (el.rateBox) el.rateBox.classList.toggle("hidden", owner || rated);
+        if (el.ratedMsg) {
+            el.ratedMsg.classList.toggle("hidden", owner || !rated);
+            if (rated) el.ratedMsg.textContent = `Ya calificaste con ${img.myRating} ★`;
+        }
+    };
+
     const renderCarousel = () => {
         const single = images.length <= 1;
         [el.prev, el.next, el.counter].forEach((node) => node && node.classList.toggle("hidden", single));
@@ -74,9 +93,11 @@ if (modal) {
             if (el.bg) el.bg.removeAttribute("src");
             return;
         }
-        el.image.src = images[index];
-        if (el.bg) el.bg.src = images[index];
+        const img = images[index];
+        el.image.src = img.url;
+        if (el.bg) el.bg.src = img.url;
         if (el.counter) el.counter.textContent = `${index + 1} / ${images.length}`;
+        renderRating(img, currentOwner);
     };
 
     const renderTags = (tags) => {
@@ -127,11 +148,6 @@ if (modal) {
         el.authorImg.src = author.profile_img || "/imgs/profile_img_default.png";
         if (el.profileLink) el.profileLink.href = author.id ? `/profile/${author.id}` : "#";
 
-        const rating = data.rating || 0;
-        el.stars.textContent = stars(rating);
-        el.rating.textContent = rating;
-        el.ratingCount.textContent = `(${data.ratingsCount || 0})`;
-
         const comments = data.comments || [];
         if (el.commentsCount) el.commentsCount.textContent = comments.length;
         renderComments(comments);
@@ -145,17 +161,7 @@ if (modal) {
             if (canEdit) el.edit.href = `/upload/${data.id}/edit`;
         }
 
-        selected = 0;
-        paintRate(0);
-        if (el.rateConfirm) el.rateConfirm.classList.add("hidden");
-
-        const alreadyRated = Boolean(data.rated);
-        if (el.rateBox) el.rateBox.classList.toggle("hidden", owner || alreadyRated);
-        if (el.ratedMsg) {
-            el.ratedMsg.classList.toggle("hidden", owner || !alreadyRated);
-            if (alreadyRated) el.ratedMsg.textContent = `Ya calificaste con ${data.myRating} ★`;
-        }
-
+        currentOwner = owner;
         images = data.images || [];
         index = 0;
         renderCarousel();
@@ -182,16 +188,17 @@ if (modal) {
     });
 
     el.rateConfirm && el.rateConfirm.addEventListener("click", async () => {
-        if (!currentData || !currentData.id || !selected) return;
+        const img = images[index];
+        if (!img || !img.id || !selected) return;
 
         el.rateConfirm.classList.add("hidden");
 
         try {
-            const res = await fetch(`/upload/${currentData.id}/rating`, {
+            const res = await fetch(`/upload/images/${img.id}/rating`, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ score: selected }),
+                body: JSON.stringify({ value: selected }),
             });
             const result = await res.json().catch(() => ({}));
 
@@ -201,27 +208,24 @@ if (modal) {
                 return;
             }
 
-            el.stars.textContent = stars(result.rating);
-            el.rating.textContent = result.rating;
-            el.ratingCount.textContent = `(${result.ratingsCount})`;
+            img.rated = true;
+            img.myRating = result.myRating;
+            img.rating = result.rating;
+            img.ratingsCount = result.ratingsCount;
 
-            if (el.rateBox) el.rateBox.classList.add("hidden");
-            if (el.ratedMsg) {
-                el.ratedMsg.textContent = `Ya calificaste con ${result.myRating} ★`;
-                el.ratedMsg.classList.remove("hidden");
-            }
-
-            currentData.rated = true;
-            currentData.myRating = result.myRating;
-            currentData.rating = result.rating;
-            currentData.ratingsCount = result.ratingsCount;
+            renderRating(img, currentOwner);
 
             if (currentRoot) {
                 currentRoot.dataset.publication = JSON.stringify(currentData);
+
+                const totalCount = images.reduce((s, im) => s + (im.ratingsCount || 0), 0);
+                const weightedSum = images.reduce((s, im) => s + (im.rating || 0) * (im.ratingsCount || 0), 0);
+                const pooled = totalCount ? Math.round((weightedSum / totalCount) * 10) / 10 : 0;
+
                 const cardStars = currentRoot.querySelector("[data-card-stars]");
                 const cardRating = currentRoot.querySelector("[data-card-rating]");
-                if (cardStars) cardStars.textContent = stars(result.rating);
-                if (cardRating) cardRating.textContent = `(${result.rating})`;
+                if (cardStars) cardStars.textContent = stars(pooled);
+                if (cardRating) cardRating.textContent = `(${pooled})`;
             }
 
             window.showToast?.("Calificacion registrada!", "success");

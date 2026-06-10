@@ -1,27 +1,49 @@
-const { Publication, Image, Tag, Rating } = require("../../models");
+const { Op } = require("sequelize");
+const { Publication, Image, Tag, Rating, User } = require("../../models");
+
+const imagesInclude = {
+    model: Image,
+    as: "images",
+    attributes: ["id", "url", "order_number", "license"],
+    separate: true,
+    order: [["order_number", "ASC"]],
+    include: [{
+        model: Tag,
+        as: "tags",
+        attributes: ["title"],
+        through: { attributes: [] },
+    }, {
+        model: Rating,
+        as: "ratings",
+        attributes: ["user_id", "value"],
+    }],
+};
 
 module.exports = {
     getPublicationsByUser: (userId) =>
         Publication.findAll({
             where: { user_id: userId, deleted: false },
-            include: [{
-                model: Image,
-                as: "images",
-                attributes: ["url", "order_number", "license"],
-                separate: true,
-                order: [["order_number", "ASC"]],
-                include: [{
-                    model: Tag,
-                    as: "tags",
-                    attributes: ["title"],
-                    through: { attributes: [] },
-                }],
-            }, {
-                model: Rating,
-                as: "ratings",
-                attributes: ["user_id", "score"],
-                separate: true,
-            }],
+            include: [imagesInclude],
+            order: [["createdAt", "DESC"]],
+        }),
+
+    getPublicationsByUsers: (userIds) =>
+        Publication.findAll({
+            where: { user_id: { [Op.in]: userIds }, deleted: false },
+            include: [
+                { model: User, as: "author", attributes: ["id", "nickname", "profile_img"] },
+                imagesInclude,
+            ],
+            order: [["createdAt", "DESC"]],
+        }),
+
+    getAllPublications: () =>
+        Publication.findAll({
+            where: { deleted: false },
+            include: [
+                { model: User, as: "author", attributes: ["id", "nickname", "profile_img"] },
+                imagesInclude,
+            ],
             order: [["createdAt", "DESC"]],
         }),
 
@@ -49,13 +71,18 @@ module.exports = {
     deleteImages: (ids, transaction) =>
         ids.length ? Image.destroy({ where: { id: ids }, transaction }) : Promise.resolve(0),
 
-    findRating: (userId, publicationId) =>
-        Rating.findOne({ where: { user_id: userId, publication_id: publicationId } }),
+    findRating: (userId, imageId) =>
+        Rating.findOne({ where: { user_id: userId, image_id: imageId } }),
 
     createRating: (data) => Rating.create(data),
 
-    getRatings: (publicationId) =>
-        Rating.findAll({ where: { publication_id: publicationId }, attributes: ["score"] }),
+    getRatings: (imageId) =>
+        Rating.findAll({ where: { image_id: imageId }, attributes: ["value"] }),
+
+    getImageById: (id) =>
+        Image.findByPk(id, {
+            include: [{ model: Publication, as: "publication", attributes: ["id", "user_id", "deleted"] }],
+        }),
 
     createPublication: (data, transaction) => Publication.create(data, { transaction }),
 

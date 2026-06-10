@@ -2,8 +2,9 @@ const sharp = require("sharp");
 const { sequelize } = require("../../models");
 const cloudinary = require("../../config/cloudinary");
 const publicationRepository = require("./publication.repository");
+const userRepository = require("../user/user.repository");
 const AppError = require("../../errors/appError");
-const { cardImage, detailImage } = require("../../utils/cloudinaryUrl");
+const { cardImage, detailImage, avatarImage } = require("../../utils/cloudinaryUrl");
 
 const uploadBuffer = (buffer) =>
     new Promise((resolve, reject) => {
@@ -44,9 +45,62 @@ const parseTags = (raw) => [
 const aggregateRatings = (ratings = []) => {
     const count = ratings.length;
     const average = count
-        ? Math.round((ratings.reduce((sum, r) => sum + r.score, 0) / count) * 10) / 10
+        ? Math.round((ratings.reduce((sum, r) => sum + r.value, 0) / count) * 10) / 10
         : 0;
     return { average, count };
+};
+
+const shapePublication = (p, { authenticated = true, viewerId, withAuthor = false } = {}) => {
+    const visible = authenticated
+        ? (p.images || [])
+        : (p.images || []).filter((i) => i.license === "sin_copyright");
+
+    if (!visible.length) return null;
+
+    const tags = [
+        ...new Set(visible.flatMap((i) => (i.tags || []).map((t) => t.title))),
+    ];
+
+    const images = visible.map((img) => {
+        const ratings = img.ratings || [];
+        const { average, count } = aggregateRatings(ratings);
+        const mine = ratings.find((r) => r.user_id === viewerId);
+        return {
+            id: img.id,
+            url: detailImage(img.url),
+            rating: average,
+            ratingsCount: count,
+            rated: Boolean(mine),
+            myRating: mine ? mine.value : null,
+        };
+    });
+
+    const { average: pubRating, count: pubRatingsCount } = aggregateRatings(
+        visible.flatMap((i) => i.ratings || [])
+    );
+
+    const shaped = {
+        id: p.id,
+        title: p.title,
+        description: p.description,
+        cover: cardImage(visible[0].url),
+        imageCount: images.length,
+        images,
+        tags,
+        rating: pubRating,
+        ratingsCount: pubRatingsCount,
+    };
+
+    if (withAuthor) {
+        const author = p.author || {};
+        shaped.author = {
+            id: author.id,
+            nickname: author.nickname,
+            profile_img: avatarImage(author.profile_img),
+        };
+    }
+
+    return shaped;
 };
 
 module.exports = {
@@ -60,35 +114,84 @@ module.exports = {
 
             if (!visible.length) return acc;
 
-            const urls = visible.map((i) => i.url);
             const tags = [
                 ...new Set(visible.flatMap((i) => (i.tags || []).map((t) => t.title))),
             ];
 
-            const ratings = p.ratings || [];
-            const { average, count } = aggregateRatings(ratings);
-            const mine = ratings.find((r) => r.user_id === viewerId);
+            const images = visible.map((img) => {
+                const ratings = img.ratings || [];
+                const { average, count } = aggregateRatings(ratings);
+                const mine = ratings.find((r) => r.user_id === viewerId);
+                return {
+                    id: img.id,
+                    url: detailImage(img.url),
+                    rating: average,
+                    ratingsCount: count,
+                    rated: Boolean(mine),
+                    myRating: mine ? mine.value : null,
+                };
+            });
 
+            const { average: pubRating, count: pubRatingsCount } = aggregateRatings(
+                visible.flatMap((i) => i.ratings || [])
+            );
             const reportsCount = (p.reports || []).length;
 
             acc.push({
                 id: p.id,
                 title: p.title,
                 description: p.description,
-                cover: cardImage(urls[0]),
-                imageCount: urls.length,
-                images: urls.map((url) => ({ url: detailImage(url) })),
+                cover: cardImage(visible[0].url),
+                imageCount: images.length,
+                images,
                 tags,
-                rating: average,
-                ratingsCount: count,
-                rated: Boolean(mine),
-                myRating: mine ? mine.score : null,
+                rating: pubRating,
+                ratingsCount: pubRatingsCount,
                 reportsCount,
                 canEdit: reportsCount === 0,
             });
 
             return acc;
         }, []);
+    },
+
+    getFollowingFeed: async (userId, { viewerId } = {}) => {
+        const followingIds = await userRepository.getFollowingIds(userId);
+        if (!followingIds.length) return [];
+
+        const publications = await publicationRepository.getPublicationsByUsers(followingIds);
+
+        return publications
+            .map((p) => shapePublication(p, { viewerId, withAuthor: true }))
+            .filter(Boolean);
+    },
+
+    getForYouFeed: async ({ authenticated = true, viewerId } = {}) => {
+        const publications = await publicationRepository.getAllPublications();
+
+        const shaped = publications
+            .map((p) => shapePublication(p, { authenticated, viewerId, withAuthor: true }))
+            .filter(Boolean);
+
+        const CONSIDERABLE_VOTES = 3;
+        const WELL_RATED = 4;
+
+        const featured = shaped
+            .filter((p) => p.ratingsCount >= CONSIDERABLE_VOTES && p.rating >= WELL_RATED)
+            .sort((a, b) => b.rating - a.rating || b.ratingsCount - a.ratingsCount);
+
+        const featuredIds = new Set(featured.map((p) => p.id));
+        const rest = shaped.filter((p) => !featuredIds.has(p.id));
+
+        const balanced = [];
+        let f = 0;
+        let r = 0;
+        while (f < featured.length || r < rest.length) {
+            for (let k = 0; k < 3 && f < featured.length; k++) balanced.push(featured[f++]);
+            if (r < rest.length) balanced.push(rest[r++]);
+        }
+
+        return balanced;
     },
 
     getPublicationForEdit: async (id, userId) => {
@@ -204,32 +307,32 @@ module.exports = {
         });
     },
 
-    rate: async (publicationId, userId, score) => {
-        const value = Number(score);
-        if (!Number.isInteger(value) || value < 1 || value > 5)
+    rateImage: async (imageId, userId, value) => {
+        const score = Number(value);
+        if (!Number.isInteger(score) || score < 1 || score > 5)
             throw new AppError(400, "La calificacion debe ser un numero del 1 al 5.");
 
-        const publication = await publicationRepository.getPublicationById(publicationId);
-        if (!publication || publication.deleted)
-            throw new AppError(404, "Publicacion no encontrada.");
+        const image = await publicationRepository.getImageById(imageId);
+        if (!image || !image.publication || image.publication.deleted)
+            throw new AppError(404, "Imagen no encontrada.");
 
-        if (publication.user_id === userId)
+        if (image.publication.user_id === userId)
             throw new AppError(403, "No podes calificar tu propia publicacion.");
 
-        const existing = await publicationRepository.findRating(userId, publicationId);
+        const existing = await publicationRepository.findRating(userId, imageId);
         if (existing)
-            throw new AppError(409, "Ya calificaste esta publicacion.");
+            throw new AppError(409, "Ya calificaste esta imagen.");
 
         await publicationRepository.createRating({
             user_id: userId,
-            publication_id: publicationId,
-            score: value,
+            image_id: imageId,
+            value: score,
         });
 
-        const ratings = await publicationRepository.getRatings(publicationId);
+        const ratings = await publicationRepository.getRatings(imageId);
         const { average, count } = aggregateRatings(ratings);
 
-        return { rating: average, ratingsCount: count, myRating: value };
+        return { rating: average, ratingsCount: count, myRating: score };
     },
 
     createPublication: async (userId, { title, description, tags }, files, meta) => {
