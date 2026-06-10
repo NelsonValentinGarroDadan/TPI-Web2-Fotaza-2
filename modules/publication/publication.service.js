@@ -77,6 +77,7 @@ const shapeImage = (img, viewerId) => {
     return {
         id: img.id,
         url: detailImage(img.url),
+        license: img.license,
         rating: average,
         ratingsCount: count,
         rated: Boolean(mine),

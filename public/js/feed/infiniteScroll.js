@@ -43,7 +43,7 @@ if (grid && sentinel) {
         (entries) => {
             if (entries[0].isIntersecting) loadMore();
         },
-        { rootMargin: "300px" }
+        { rootMargin: "150px" }
     );
 
     observer.observe(sentinel);

@@ -31,6 +31,7 @@ if (modal) {
         commentsDisabled: modal.querySelector("[data-pv-comments-disabled]"),
         commentSend: modal.querySelector("[data-pv-comment-send]"),
         interest: modal.querySelector("[data-pv-interest]"),
+        interestWrap: modal.querySelector("[data-pv-interest-wrap]"),
         report: modal.querySelector("[data-pv-report]"),
     };
 
@@ -123,6 +124,7 @@ if (modal) {
         if (el.counter) el.counter.textContent = `${index + 1} / ${images.length}`;
         renderRating(img, currentOwner);
         renderImageComments(img);
+        if (el.interestWrap) el.interestWrap.classList.toggle("hidden", img.license !== "copyright");
     };
 
     const renderTags = (tags) => {

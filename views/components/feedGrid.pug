@@ -15,4 +15,4 @@ mixin feedGrid(publications, endpoint, hasMore, gridClass, emptyMsg)
                 +publicationCard(pub, pub.author, Boolean(user) && pub.author && pub.author.id === user.id)
 
         if hasMore
-            div(data-feed-sentinel class="h-8 w-full")
+            div(data-feed-sentinel class="w-full flex items-center justify-center py-6 text-sm text-black opacity-60") Cargando mas...
