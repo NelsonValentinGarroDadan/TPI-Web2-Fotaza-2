@@ -6,6 +6,7 @@ if (modal) {
         close: modal.querySelector("[data-modal-close]"),
         title: modal.querySelector("[data-pv-title]"),
         image: modal.querySelector("[data-pv-image]"),
+        bg: modal.querySelector("[data-pv-bg]"),
         prev: modal.querySelector("[data-pv-prev]"),
         next: modal.querySelector("[data-pv-next]"),
         counter: modal.querySelector("[data-pv-counter]"),
@@ -35,9 +36,11 @@ if (modal) {
 
         if (!images.length) {
             el.image.removeAttribute("src");
+            if (el.bg) el.bg.removeAttribute("src");
             return;
         }
         el.image.src = images[index];
+        if (el.bg) el.bg.src = images[index];
         if (el.counter) el.counter.textContent = `${index + 1} / ${images.length}`;
     };
 

@@ -19,9 +19,12 @@ module.exports = {
         if (!Number.isInteger(targetId) || targetId === req.user.id)
             return res.redirect("/profile");
 
-        const profile = await userService.getPublicProfile(targetId, req.user.id);
+        const [profile, publications] = await Promise.all([
+            userService.getPublicProfile(targetId, req.user.id),
+            publicationService.getUserPublicationsDetailed(targetId, { authenticated: Boolean(req.user) }),
+        ]);
 
-        res.render("user/userProfile.pug", { profile });
+        res.render("user/userProfile.pug", { profile, publications });
     },
 
     follow: async (req, res) => {

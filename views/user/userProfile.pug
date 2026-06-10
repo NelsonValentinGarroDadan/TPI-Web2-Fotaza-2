@@ -1,5 +1,7 @@
 extend ../layouts/app.pug
 include ../components/navItem.pug
+include ../components/publicationCard.pug
+include ../components/publicationModal.pug
 
 block app
     section(class="flex flex-col items-center justify-start w-full py-8 px-4")
@@ -43,6 +45,14 @@ block app
             +navItem("btn-publications", "app-window", "Publicaciones", true, false, null, null, "px-5")
 
         div#tab-content(class="w-[90vw] mt-2")
+            if !publications || !publications.length
+                p(class="text-sm text-black opacity-60 p-4") Este usuario todavia no tiene publicaciones visibles.
+            else
+                div(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start")
+                    each pub in publications
+                        +publicationCard(pub, profile, false)
+
+    +publicationModal()
 
     script(src="/js/user/follow.js" type="module")
-    script(src="/js/user/userProfile.js" type="module")
+    script(src="/js/publication/publicationModal.js" type="module")

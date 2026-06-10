@@ -4,7 +4,6 @@ include ./icon.pug
 mixin publicationCard(pub, author, owner)
     -
         const imgs = (pub.images || []).map((i) => (typeof i === "string" ? { url: i } : i))
-        const cover = imgs[0] || {}
         const rating = pub.rating || 0
         const fullStars = Math.round(rating)
         const commentsCount = (pub.comments || []).length
@@ -23,14 +22,14 @@ mixin publicationCard(pub, author, owner)
         button(
             type="button"
             data-card
-            class="group w-full text-left bg-white border-2 border-black cursor-pointer h-[50vh] flex flex-col overflow-hidden"
+            class="group w-full text-left bg-white border-2 border-black cursor-pointer flex flex-col overflow-hidden"
         )
 
             div(class="shrink-0 bg-linear-to-r from-blue to-blue-l px-3 py-1")
                 h3(class="text-white font-bold text-sm truncate")= pub.title || "Publicacion"
 
-            div(class="flex-1 min-h-0 bg-win-gray-l/40 overflow-hidden flex items-center justify-center")
-                img(src=cover.url alt=(pub.title || "") class="w-full h-full object-contain transition-none group-hover:scale-105")
+            div(class="aspect-4/3 overflow-hidden bg-win-gray-l/40")
+                img(src=pub.cover alt=(pub.title || "") class="w-full h-full object-cover transition-none group-hover:scale-105")
 
             div(class="shrink-0 p-3 flex flex-col gap-2")
 

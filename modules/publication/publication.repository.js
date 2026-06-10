@@ -7,7 +7,7 @@ module.exports = {
             include: [{
                 model: Image,
                 as: "images",
-                attributes: ["url", "order_number"],
+                attributes: ["url", "order_number", "license"],
                 separate: true,
                 order: [["order_number", "ASC"]],
                 include: [{

@@ -3,6 +3,7 @@ const { sequelize } = require("../../models");
 const cloudinary = require("../../config/cloudinary");
 const publicationRepository = require("./publication.repository");
 const AppError = require("../../errors/appError");
+const { cardImage, detailImage } = require("../../utils/cloudinaryUrl");
 
 const uploadBuffer = (buffer) =>
     new Promise((resolve, reject) => {
@@ -41,36 +42,33 @@ const parseTags = (raw) => [
 ];
 
 module.exports = {
-    getUserPublications: async (userId) => {
+    getUserPublicationsDetailed: async (userId, { authenticated = true } = {}) => {
         const publications = await publicationRepository.getPublicationsByUser(userId);
 
-        return publications.map((p) => ({
-            id: p.id,
-            title: p.title,
-            cover: p.images?.[0]?.url || null,
-            imageCount: p.images?.length || 0,
-        }));
-    },
+        return publications.reduce((acc, p) => {
+            const visible = authenticated
+                ? (p.images || [])
+                : (p.images || []).filter((i) => i.license === "sin_copyright");
 
-    getUserPublicationsDetailed: async (userId) => {
-        const publications = await publicationRepository.getPublicationsByUser(userId);
+            if (!visible.length) return acc;
 
-        return publications.map((p) => {
-            const images = (p.images || []).map((i) => ({ url: i.url }));
+            const urls = visible.map((i) => i.url);
             const tags = [
-                ...new Set((p.images || []).flatMap((i) => (i.tags || []).map((t) => t.title))),
+                ...new Set(visible.flatMap((i) => (i.tags || []).map((t) => t.title))),
             ];
 
-            return {
+            acc.push({
                 id: p.id,
                 title: p.title,
                 description: p.description,
-                cover: images[0]?.url || null,
-                imageCount: images.length,
-                images,
+                cover: cardImage(urls[0]),
+                imageCount: urls.length,
+                images: urls.map((url) => ({ url: detailImage(url) })),
                 tags,
-            };
-        });
+            });
+
+            return acc;
+        }, []);
     },
 
     createPublication: async (userId, { title, description, tags }, files, meta) => {

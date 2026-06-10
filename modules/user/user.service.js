@@ -1,5 +1,6 @@
 const userRepository = require("./user.repository");
 const AppError = require("../../errors/appError");
+const { avatarImage } = require("../../utils/cloudinaryUrl");
 
 module.exports = {
     getProfile: async (id) => {
@@ -12,7 +13,7 @@ module.exports = {
             user.countFollowing(),
         ]);
 
-        return { ...user.toJSON(), followers, following };
+        return { ...user.toJSON(), profile_img: avatarImage(user.profile_img), followers, following };
     },
 
     getPublicProfile: async (targetId, viewerId) => {
@@ -26,7 +27,7 @@ module.exports = {
             userRepository.isFollowing(viewerId, targetId),
         ]);
 
-        return { ...user.toJSON(), followers, following, isFollowing };
+        return { ...user.toJSON(), profile_img: avatarImage(user.profile_img), followers, following, isFollowing };
     },
 
     follow: async (viewerId, targetId) => {

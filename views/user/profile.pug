@@ -107,7 +107,7 @@ block app
                 if !publications || !publications.length
                     p(class="text-sm text-black opacity-60 p-4") Todavia no tenes publicaciones.
                 else
-                    div(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4")
+                    div(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start")
                         each pub in publications
                             +publicationCard(pub, profile, true)
 
