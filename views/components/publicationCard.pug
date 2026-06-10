@@ -5,6 +5,7 @@ mixin publicationCard(pub, author, owner)
     -
         const imgs = (pub.images || []).map((i) => (typeof i === "string" ? { url: i } : i))
         const rating = pub.rating || 0
+        const ratingsCount = pub.ratingsCount || 0
         const fullStars = Math.round(rating)
         const commentsCount = pub.commentsCount || 0
         const modalData = {
@@ -15,7 +16,7 @@ mixin publicationCard(pub, author, owner)
             tags: pub.tags || [],
             images: imgs,
             commentsEnabled: pub.commentsEnabled !== false,
-            author: { nickname: author.nickname, profile_img: author.profile_img, id: author.id },
+            author: { nickname: author.nickname, profile_img: author.profile_img, id: author.id, isFollowing: Boolean(author.isFollowing) },
         }
 
     div(data-pub data-owner=String(!!owner) data-publication=JSON.stringify(modalData) class="relative")
@@ -56,7 +57,8 @@ mixin publicationCard(pub, author, owner)
                                 | ★
                             else
                                 | ☆
-                    span(data-card-rating class="text-xs text-black opacity-60") (#{rating})
+                    span(data-card-rating class="text-sm font-bold text-black") #{rating}
+                    span(data-card-rating-count class="text-xs text-black opacity-60") (#{ratingsCount})
 
                 div(class="border-t border-win-gray pt-2 flex items-stretch gap-2")
                     +winBorder("flex-1")

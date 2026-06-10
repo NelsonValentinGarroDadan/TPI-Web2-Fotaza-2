@@ -86,7 +86,7 @@ const shapeImage = (img, viewerId) => {
     };
 };
 
-const shapePublication = (p, { authenticated = true, viewerId, withAuthor = false } = {}) => {
+const shapePublication = (p, { authenticated = true, viewerId, withAuthor = false, followingIds = null } = {}) => {
     const visible = authenticated
         ? (p.images || [])
         : (p.images || []).filter((i) => i.license === "sin_copyright");
@@ -123,6 +123,7 @@ const shapePublication = (p, { authenticated = true, viewerId, withAuthor = fals
             id: author.id,
             nickname: author.nickname,
             profile_img: avatarImage(author.profile_img),
+            isFollowing: followingIds ? followingIds.has(author.id) : false,
         };
     }
 
@@ -210,17 +211,19 @@ module.exports = {
         if (!followingIds.length) return [];
 
         const publications = await publicationRepository.getPublicationsByUsers(followingIds);
+        const followingSet = new Set(followingIds);
 
         return publications
-            .map((p) => shapePublication(p, { viewerId, withAuthor: true }))
+            .map((p) => shapePublication(p, { viewerId, withAuthor: true, followingIds: followingSet }))
             .filter(Boolean);
     },
 
     getForYouFeed: async ({ authenticated = true, viewerId } = {}) => {
         const publications = await publicationRepository.getAllPublications();
+        const followingSet = viewerId ? new Set(await userRepository.getFollowingIds(viewerId)) : null;
 
         const shaped = publications
-            .map((p) => shapePublication(p, { authenticated, viewerId, withAuthor: true }))
+            .map((p) => shapePublication(p, { authenticated, viewerId, withAuthor: true, followingIds: followingSet }))
             .filter(Boolean)
             .sort((a, b) => b.rating - a.rating || b.ratingsCount - a.ratingsCount || a.id - b.id);
 
@@ -236,9 +239,10 @@ module.exports = {
 
     getSearchFeed: async ({ tags = [], keywords = [], minRating, maxRating } = {}, { authenticated = true, viewerId } = {}) => {
         const publications = await publicationRepository.getAllPublications();
+        const followingSet = viewerId ? new Set(await userRepository.getFollowingIds(viewerId)) : null;
 
         let shaped = publications
-            .map((p) => shapePublication(p, { authenticated, viewerId, withAuthor: true }))
+            .map((p) => shapePublication(p, { authenticated, viewerId, withAuthor: true, followingIds: followingSet }))
             .filter(Boolean);
 
         if (keywords.length) {

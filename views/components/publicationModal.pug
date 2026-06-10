@@ -47,9 +47,10 @@ mixin publicationModal()
                             +pmSection("Autor")
                                 div(class="flex items-center gap-3")
                                     img(data-pv-author-img src="/imgs/profile_img_default.png" alt="Foto de perfil" class="w-12 h-12 object-cover border-2 border-black")
-                                    div(class="flex flex-col")
-                                        span(data-pv-author-name class="text-sm font-bold text-black") @usuario
+                                    div(class="flex flex-col min-w-0")
+                                        span(data-pv-author-name class="text-sm font-bold text-black truncate") @usuario
                                         a(data-pv-profile-link href="#" class="text-xs text-blue-l hover:text-blue underline") Ver perfil
+                                    button(type="button" data-pv-follow class="hidden ml-auto shrink-0 px-3 py-1 text-sm border border-black cursor-pointer") Seguir
 
                         +pmSection("Descripcion")
                             p(data-pv-description class="text-sm text-black opacity-80 whitespace-pre-line mb-3")

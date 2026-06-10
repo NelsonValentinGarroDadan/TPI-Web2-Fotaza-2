@@ -14,6 +14,7 @@ if (modal) {
         authorImg: modal.querySelector("[data-pv-author-img]"),
         authorName: modal.querySelector("[data-pv-author-name]"),
         profileLink: modal.querySelector("[data-pv-profile-link]"),
+        follow: modal.querySelector("[data-pv-follow]"),
         description: modal.querySelector("[data-pv-description]"),
         tags: modal.querySelector("[data-pv-tags]"),
         stars: modal.querySelector("[data-pv-stars]"),
@@ -43,11 +44,22 @@ if (modal) {
     let currentRoot = null;
     let currentOwner = false;
     let commentsEnabled = true;
+    let currentAuthorId = null;
+    let following = false;
     let selected = 0;
 
     const stars = (rating) => {
         const full = Math.round(rating);
         return "★".repeat(full) + "☆".repeat(Math.max(0, 5 - full));
+    };
+
+    const followBase = "ml-auto shrink-0 px-3 py-1 text-sm border border-black cursor-pointer";
+
+    const renderFollow = (isFollowing) => {
+        if (!el.follow) return;
+        following = isFollowing;
+        el.follow.textContent = isFollowing ? "Siguiendo" : "Seguir";
+        el.follow.className = `${followBase} ${isFollowing ? "bg-win-gray/30 hover:bg-win-gray/50 text-black" : "bg-blue-l hover:bg-blue text-white"}`;
     };
 
     const rateStars = [];
@@ -185,6 +197,17 @@ if (modal) {
         el.authorImg.src = author.profile_img || "/imgs/profile_img_default.png";
         if (el.profileLink) el.profileLink.href = author.id ? `/profile/${author.id}` : "#";
 
+        currentAuthorId = author.id || null;
+        if (el.follow) {
+            const showFollow = Boolean(author.id) && author.id !== currentUserId;
+            if (showFollow) {
+                renderFollow(Boolean(author.isFollowing));
+                el.follow.classList.remove("hidden");
+            } else {
+                el.follow.classList.add("hidden");
+            }
+        }
+
         commentsEnabled = data.commentsEnabled !== false;
 
         modal.querySelectorAll("[data-hide-owner]").forEach((node) => node.classList.toggle("hidden", owner));
@@ -259,8 +282,10 @@ if (modal) {
 
                 const cardStars = currentRoot.querySelector("[data-card-stars]");
                 const cardRating = currentRoot.querySelector("[data-card-rating]");
+                const cardRatingCount = currentRoot.querySelector("[data-card-rating-count]");
                 if (cardStars) cardStars.textContent = stars(pooled);
-                if (cardRating) cardRating.textContent = `(${pooled})`;
+                if (cardRating) cardRating.textContent = pooled;
+                if (cardRatingCount) cardRatingCount.textContent = `(${totalCount})`;
             }
 
             window.showToast?.("Calificacion registrada!", "success");
@@ -321,6 +346,36 @@ if (modal) {
 
     el.report && el.report.addEventListener("click", () => {
         if (!authenticated) return requireLogin();
+    });
+
+    el.follow && el.follow.addEventListener("click", async () => {
+        if (!authenticated) return requireLogin();
+        if (!currentAuthorId) return;
+
+        const method = following ? "DELETE" : "POST";
+        el.follow.disabled = true;
+
+        try {
+            const res = await fetch(`/profile/${currentAuthorId}/follow`, { method, credentials: "include" });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                window.showToast?.(data.message || "No se pudo completar la accion.", "error");
+                return;
+            }
+
+            renderFollow(!following);
+
+            if (currentData && currentData.author) {
+                currentData.author.isFollowing = following;
+                if (currentRoot) currentRoot.dataset.publication = JSON.stringify(currentData);
+            }
+
+            window.showToast?.(following ? "Ahora seguis a este usuario." : "Dejaste de seguir a este usuario.", "success");
+        } catch {
+            window.showToast?.("Error de red.", "error");
+        } finally {
+            el.follow.disabled = false;
+        }
     });
 
     el.close && el.close.addEventListener("click", close);

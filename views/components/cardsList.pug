@@ -1,4 +1,4 @@
 include ./publicationCard.pug
 
 each pub in publications
-    +publicationCard(pub, pub.author, false)
+    +publicationCard(pub, pub.author, Boolean(user) && pub.author && pub.author.id === user.id)

@@ -12,7 +12,7 @@ mixin feedGrid(publications, endpoint, hasMore, gridClass, emptyMsg)
             class=`grid ${gridClass} gap-4 items-start`
         )
             each pub in publications
-                +publicationCard(pub, pub.author, false)
+                +publicationCard(pub, pub.author, Boolean(user) && pub.author && pub.author.id === user.id)
 
         if hasMore
             div(data-feed-sentinel class="h-8 w-full")
