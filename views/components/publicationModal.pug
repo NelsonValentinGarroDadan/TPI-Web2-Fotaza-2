@@ -9,24 +9,26 @@ mixin pmSection(title)
             block
 
 mixin publicationModal()
-    div(data-pub-modal class="hidden fixed inset-0 z-50 items-center justify-center p-4")
+    div(data-pub-modal data-authenticated=String(Boolean(user)) class="hidden fixed inset-0 z-50 items-center justify-center p-4")
         div(data-modal-backdrop class="absolute inset-0 bg-black/60")
 
         div(class="relative w-[90vw] max-w-5xl h-[95vh] flex flex-col overflow-hidden bg-bk border-2 border-black")
 
-            div(class="w-full flex items-center justify-end gap-2 bg-linear-to-r from-blue to-blue-l px-3 py-1")
-                a(
-                    data-pv-edit
-                    href="#"
-                    title="Editar publicacion"
-                    class="hidden items-center justify-center bg-win-gray-l hover:bg-win-gray text-white border-2 border-black cursor-pointer px-1"
-                )
-                    +icon("gear", "h-4 w-4")
-                button(
-                    type="button"
-                    data-modal-close
-                    class="flex items-center justify-center h-5 bg-red-500 hover:bg-red-700 text-white border-2 border-black cursor-pointer py-2 px-1"
-                ) ✕
+            div(class="w-full flex items-center justify-between gap-2 bg-linear-to-r from-blue to-blue-l px-3 py-1")
+                h2(data-pv-title class="text-white font-bold text-sm truncate") Publicacion
+                div(class="shrink-0 flex items-center gap-2")
+                    a(
+                        data-pv-edit
+                        href="#"
+                        title="Editar publicacion"
+                        class="hidden items-center justify-center bg-win-gray-l hover:bg-win-gray text-white border-2 border-black cursor-pointer px-1"
+                    )
+                        +icon("gear", "h-4 w-4")
+                    button(
+                        type="button"
+                        data-modal-close
+                        class="flex items-center justify-center h-5 bg-red-500 hover:bg-red-700 text-white border-2 border-black cursor-pointer py-2 px-1"
+                    ) ✕
 
             div(class="flex-1 min-h-0 flex flex-col lg:flex-row gap-4 p-4")
 
@@ -47,7 +49,7 @@ mixin publicationModal()
                                 textarea(class="w-full h-16 resize-none text-sm text-black px-2 py-1" placeholder="Escribi un comentario...")
                             div(class="shrink-0 flex justify-end")
                                 +winBorder()
-                                    button(type="button" class="px-4 py-1 bg-win-gray/30 hover:bg-win-gray/50 text-sm text-black cursor-pointer") Comentar
+                                    button(type="button" data-pv-comment-send class="px-4 py-1 bg-win-gray/30 hover:bg-win-gray/50 text-sm text-black cursor-pointer") Comentar
                             div(data-pv-comments class="flex flex-col gap-2 min-h-0 overflow-y-auto")
 
                 div(class="w-full lg:w-80 shrink-0 flex flex-col gap-3 min-h-0 overflow-y-auto")
@@ -81,6 +83,9 @@ mixin publicationModal()
                                 ) ✓
                         p(data-pv-rated-msg class="hidden text-sm font-bold text-black")
 
-                    div(data-hide-owner)
-                        +winBorder("w-full")
-                            button(type="button" class="w-full px-4 py-2 bg-win-gray/20 hover:bg-win-gray/40 text-sm text-black cursor-pointer") Me interesa obtenerla
+                    div(data-hide-owner class="flex items-stretch gap-2")
+                        +winBorder("flex-1")
+                            button(type="button" data-pv-interest class="w-full h-full px-4 py-2 bg-win-gray/20 hover:bg-win-gray/40 text-sm text-black cursor-pointer") Me interesa obtenerla
+                        +winBorder()
+                            button(type="button" data-pv-report title="Reportar" class="h-full px-3 py-2 bg-win-gray/20 hover:bg-win-gray/40 text-red-500 cursor-pointer flex items-center justify-center")
+                                +icon("flag", "w-5 h-5")

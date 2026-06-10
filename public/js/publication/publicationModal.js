@@ -25,7 +25,13 @@ if (modal) {
         ratedMsg: modal.querySelector("[data-pv-rated-msg]"),
         comments: modal.querySelector("[data-pv-comments]"),
         commentsCount: modal.querySelector("[data-pv-comments-count]"),
+        commentSend: modal.querySelector("[data-pv-comment-send]"),
+        interest: modal.querySelector("[data-pv-interest]"),
+        report: modal.querySelector("[data-pv-report]"),
     };
+
+    const authenticated = modal.dataset.authenticated === "true";
+    const requireLogin = () => { window.location.href = "/autentication/login"; };
 
     let images = [];
     let index = 0;
@@ -56,6 +62,7 @@ if (modal) {
             star.textContent = "☆";
             star.addEventListener("mouseenter", () => paintRate(i));
             star.addEventListener("click", () => {
+                if (!authenticated) return requireLogin();
                 selected = i;
                 paintRate(i);
                 if (el.rateConfirm) el.rateConfirm.classList.remove("hidden");
@@ -233,6 +240,18 @@ if (modal) {
             window.showToast?.("Error de red.", "error");
             el.rateConfirm.classList.remove("hidden");
         }
+    });
+
+    el.commentSend && el.commentSend.addEventListener("click", () => {
+        if (!authenticated) return requireLogin();
+    });
+
+    el.interest && el.interest.addEventListener("click", () => {
+        if (!authenticated) return requireLogin();
+    });
+
+    el.report && el.report.addEventListener("click", () => {
+        if (!authenticated) return requireLogin();
     });
 
     el.close && el.close.addEventListener("click", close);
