@@ -116,8 +116,9 @@ if (modal) {
     const renderTags = (tags) => {
         el.tags.innerHTML = "";
         (tags || []).forEach((tag) => {
-            const chip = document.createElement("span");
-            chip.className = "px-2 py-0.5 text-xs text-black bg-win-gray-l/40 border border-black";
+            const chip = document.createElement("a");
+            chip.href = `/search?q=${encodeURIComponent(`#${tag}`)}`;
+            chip.className = "px-2 py-0.5 text-xs text-black bg-win-gray-l/40 border border-black hover:bg-win-gray-l cursor-pointer";
             chip.textContent = `#${tag}`;
             el.tags.appendChild(chip);
         });
