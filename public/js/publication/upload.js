@@ -27,6 +27,38 @@ let items = [];
 let seq = 0;
 let pvIndex = 0;
 
+let bootstrap = { mode: "create", publication: null };
+try {
+    bootstrap = JSON.parse(document.getElementById("upload-bootstrap")?.textContent || "{}");
+} catch {
+    bootstrap = { mode: "create", publication: null };
+}
+const editMode = bootstrap.mode === "edit";
+const publicationId = bootstrap.publication?.id ?? null;
+
+const previewSrc = (item) =>
+    item.kind === "existing" ? item.url : URL.createObjectURL(item.file);
+
+const prefillFromBootstrap = () => {
+    const pub = bootstrap.publication;
+    if (!editMode || !pub) return;
+
+    titleInput.value = pub.title || "";
+    descInput.value = pub.description || "";
+    tagsInput.value = (pub.tags || []).join(", ");
+
+    (pub.images || []).forEach((img) =>
+        items.push({
+            id: ++seq,
+            kind: "existing",
+            imageId: img.id,
+            url: img.url,
+            license: img.license === "copyright" ? "copyright" : "none",
+            watermark: img.watermark || "",
+        })
+    );
+};
+
 const updatePreviewMeta = () => {
     const title = titleInput.value.trim() || "Titulo de la publicacion";
     pv.title.textContent = title;
@@ -48,7 +80,7 @@ const updatePreviewMeta = () => {
 const updateWatermarkOverlay = () => {
     const item = items[pvIndex];
 
-    if (item && item.license === "copyright" && item.watermark.trim()) {
+    if (item && item.kind === "new" && item.license === "copyright" && item.watermark.trim()) {
         pv.watermark.textContent = item.watermark;
         pv.watermark.classList.remove("hidden");
     } else {
@@ -75,7 +107,7 @@ const updatePreviewCarousel = () => {
 
     pv.empty.classList.add("hidden");
     pv.image.classList.remove("hidden");
-    pv.image.src = URL.createObjectURL(items[pvIndex].file);
+    pv.image.src = previewSrc(items[pvIndex]);
     pv.counter.textContent = `${pvIndex + 1} / ${items.length}`;
     updateWatermarkOverlay();
 };
@@ -106,10 +138,32 @@ const render = () => {
         card.className = "border-2 border-black bg-white p-2 flex gap-3 items-start";
         card.dataset.id = item.id;
 
-        const url = URL.createObjectURL(item.file);
+        if (item.kind === "existing") {
+            const licenseText = item.license === "copyright"
+                ? `Con copyright${item.watermark ? ` · "${item.watermark}"` : ""}`
+                : "Sin copyright";
+
+            card.innerHTML = `
+                <img src="${item.url}" class="w-20 h-20 object-cover border border-black shrink-0">
+                <div class="flex flex-col gap-1 flex-1 min-w-0">
+                    <p class="text-xs text-black truncate">Imagen actual</p>
+                    <p class="text-xs text-black opacity-60">${licenseText}</p>
+                </div>
+                <button type="button" data-remove class="shrink-0 bg-red-500 text-white w-6 h-6 border border-black cursor-pointer">X</button>
+            `;
+
+            card.querySelector("[data-remove]").addEventListener("click", () => {
+                items = items.filter((i) => i.id !== item.id);
+                render();
+                updatePreviewCarousel();
+            });
+
+            previews.appendChild(card);
+            return;
+        }
 
         card.innerHTML = `
-            <img src="${url}" class="w-20 h-20 object-cover border border-black shrink-0">
+            <img src="${URL.createObjectURL(item.file)}" class="w-20 h-20 object-cover border border-black shrink-0">
             <div class="flex flex-col gap-1 flex-1 min-w-0">
                 <p class="text-xs text-black truncate" data-name></p>
                 <div class="flex items-center gap-4 text-xs text-black">
@@ -158,7 +212,7 @@ const render = () => {
 const addFiles = (fileList) => {
     [...fileList]
         .filter((file) => file.type.startsWith("image/"))
-        .forEach((file) => items.push({ id: ++seq, file, license: "none", watermark: "" }));
+        .forEach((file) => items.push({ id: ++seq, kind: "new", file, license: "none", watermark: "" }));
 
     render();
 };
@@ -209,31 +263,44 @@ form.addEventListener("submit", async (e) => {
     payload.append("description", description);
     payload.append("tags", tags);
 
-    const meta = items.map((item) => ({
-        license: item.license,
-        watermark: item.license === "copyright" ? item.watermark : "",
-    }));
+    const meta = items.map((item) =>
+        item.kind === "existing"
+            ? { kind: "existing", id: item.imageId }
+            : {
+                kind: "new",
+                license: item.license,
+                watermark: item.license === "copyright" ? item.watermark : "",
+            }
+    );
 
-    items.forEach((item) => payload.append("images", item.file));
+    items
+        .filter((item) => item.kind === "new")
+        .forEach((item) => payload.append("images", item.file));
     payload.append("meta", JSON.stringify(meta));
 
     btnPublish.disabled = true;
-    btnPublish.textContent = "Publicando...";
+    btnPublish.textContent = editMode ? "Guardando..." : "Publicando...";
 
-    const res = await fetch("/upload", { method: "POST", credentials: "include", body: payload });
+    const res = await fetch(editMode ? `/upload/${publicationId}` : "/upload", {
+        method: editMode ? "PUT" : "POST",
+        credentials: "include",
+        body: payload,
+    });
     const data = await res.json().catch(() => ({}));
 
     btnPublish.disabled = false;
-    btnPublish.textContent = "Publicar";
+    btnPublish.textContent = editMode ? "Guardar cambios" : "Publicar";
 
     if (!res.ok) {
-        window.showToast?.(data.message || "No se pudo crear la publicacion.", "error");
+        window.showToast?.(data.message || "No se pudo guardar la publicacion.", "error");
         return;
     }
 
-    window.showToast?.("Publicacion creada!", "success");
-    setTimeout(() => { window.location.href = "/"; }, 800);
+    window.showToast?.(editMode ? "Publicacion actualizada!" : "Publicacion creada!", "success");
+    setTimeout(() => { window.location.href = editMode ? "/profile" : "/"; }, 800);
 });
 
+prefillFromBootstrap();
+render();
 updatePreviewMeta();
 updatePreviewCarousel();

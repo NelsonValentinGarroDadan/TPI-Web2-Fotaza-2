@@ -9,8 +9,10 @@ block app
 
             div(class="flex items-center gap-2 bg-linear-to-r from-blue to-blue-l px-3 py-1")
                 span(class="text-white")
-                    +icon("upload", "w-5 h-5")
-                h1(class="text-white font-bold text-sm") Subir nueva publicacion - Fotaza 2
+                    +icon((mode === "edit" ? "gear" : "upload"), "w-5 h-5")
+                h1(class="text-white font-bold text-sm")= (mode === "edit" ? "Editar publicacion - Fotaza 2" : "Subir nueva publicacion - Fotaza 2")
+
+            script(id="upload-bootstrap" type="application/json")!= JSON.stringify({ mode, publication }).replace(/</g, "\\u003c")
 
             form(id="form-upload" class="flex flex-col gap-4 p-6")
 
@@ -87,7 +89,7 @@ block app
                             type="submit"
                             id="btn-publish"
                             class="w-full px-4 py-2 bg-blue-l hover:bg-blue text-white text-sm cursor-pointer"
-                        ) Publicar
+                        )= (mode === "edit" ? "Guardar cambios" : "Publicar")
                     +winBorder()
                         a(
                             href="/"

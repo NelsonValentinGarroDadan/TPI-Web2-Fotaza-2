@@ -8,6 +8,8 @@ mixin publicationCard(pub, author, owner)
         const fullStars = Math.round(rating)
         const commentsCount = (pub.comments || []).length
         const modalData = {
+            id: pub.id,
+            canEdit: pub.canEdit,
             title: pub.title,
             description: pub.description,
             tags: pub.tags || [],
@@ -15,9 +17,19 @@ mixin publicationCard(pub, author, owner)
             author: { nickname: author.nickname, profile_img: author.profile_img, id: author.id },
             rating,
             ratingsCount: pub.ratingsCount || 0,
+            rated: Boolean(pub.rated),
+            myRating: pub.myRating || null,
         }
 
     div(data-pub data-owner=String(!!owner) data-publication=JSON.stringify(modalData) class="relative")
+
+        if owner && pub.canEdit
+            a(
+                href=`/upload/${pub.id}/edit`
+                title="Editar publicacion"
+                class="absolute top-1 right-1 z-10 flex items-center justify-center bg-win-gray-l border-2 border-black text-white hover:bg-win-gray cursor-pointer px-1"
+            )
+                +icon("gear", "w-4 h-4")
 
         button(
             type="button"
@@ -39,13 +51,13 @@ mixin publicationCard(pub, author, owner)
                         span(class="text-xs text-blue-l truncate") by #{author.nickname || "usuario"}
 
                 div(class="flex items-center gap-2")
-                    span(class="text-yellow-500 text-lg leading-none")
+                    span(data-card-stars class="text-yellow-500 text-lg leading-none")
                         each _, i in [0, 1, 2, 3, 4]
                             if i < fullStars
                                 | ★
                             else
                                 | ☆
-                    span(class="text-xs text-black opacity-60") (#{rating})
+                    span(data-card-rating class="text-xs text-black opacity-60") (#{rating})
 
                 div(class="border-t border-win-gray pt-2 flex items-stretch gap-2")
                     +winBorder("flex-1")
