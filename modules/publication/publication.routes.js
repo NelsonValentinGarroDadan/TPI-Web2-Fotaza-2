@@ -3,6 +3,8 @@ const multer = require('multer');
 const publicationController = require('./publication.controller');
 const requireAuth = require('../../middlewares/requireAuth');
 const requireAuthPage = require('../../middlewares/requireAuthPage');
+const ValidatorHandler = require('../../middlewares/validatorHandler');
+const { commentDTO, ratingDTO } = require('./publication.dto');
 const publicationRoutes = Router();
 
 const upload = multer({
@@ -18,6 +20,8 @@ publicationRoutes.post("/", requireAuth, upload.array("images", 10), publication
 
 publicationRoutes.put("/:id", requireAuth, upload.array("images", 10), publicationController.updatePublication);
 
-publicationRoutes.post("/images/:id/rating", requireAuth, publicationController.rateImage);
+publicationRoutes.post("/images/:id/rating", requireAuth, ValidatorHandler(ratingDTO), publicationController.rateImage);
+
+publicationRoutes.post("/images/:id/comment", requireAuth, ValidatorHandler(commentDTO), publicationController.createComment);
 
 module.exports = publicationRoutes;

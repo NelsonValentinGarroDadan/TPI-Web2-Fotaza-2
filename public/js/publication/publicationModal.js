@@ -25,12 +25,16 @@ if (modal) {
         ratedMsg: modal.querySelector("[data-pv-rated-msg]"),
         comments: modal.querySelector("[data-pv-comments]"),
         commentsCount: modal.querySelector("[data-pv-comments-count]"),
+        commentForm: modal.querySelector("[data-pv-comment-form]"),
+        commentInput: modal.querySelector("[data-pv-comment-input]"),
+        commentsDisabled: modal.querySelector("[data-pv-comments-disabled]"),
         commentSend: modal.querySelector("[data-pv-comment-send]"),
         interest: modal.querySelector("[data-pv-interest]"),
         report: modal.querySelector("[data-pv-report]"),
     };
 
     const authenticated = modal.dataset.authenticated === "true";
+    const currentUserId = Number(modal.dataset.userId) || null;
     const requireLogin = () => { window.location.href = "/autentication/login"; };
 
     let images = [];
@@ -38,6 +42,7 @@ if (modal) {
     let currentData = null;
     let currentRoot = null;
     let currentOwner = false;
+    let commentsEnabled = true;
     let selected = 0;
 
     const stars = (rating) => {
@@ -105,6 +110,7 @@ if (modal) {
         if (el.bg) el.bg.src = img.url;
         if (el.counter) el.counter.textContent = `${index + 1} / ${images.length}`;
         renderRating(img, currentOwner);
+        renderImageComments(img);
     };
 
     const renderTags = (tags) => {
@@ -122,27 +128,50 @@ if (modal) {
         el.comments.innerHTML = "";
         (comments || []).forEach((c) => {
             const item = document.createElement("div");
-            item.className = "bg-win-gray-l/30 border border-win-gray p-2";
+            item.className = "bg-win-gray-l/30 border border-win-gray p-2 min-w-0";
 
             const head = document.createElement("div");
-            head.className = "flex items-center justify-between";
+            head.className = "flex items-center justify-between gap-2";
 
             const author = document.createElement("span");
-            author.className = "text-sm font-bold text-black";
-            author.textContent = `@${c.author || "usuario"}`;
+            author.className = "text-sm font-bold text-black truncate min-w-0";
+            author.textContent = currentUserId && c.userId === currentUserId
+                ? "Tú"
+                : `@${c.author || "usuario"}`;
+
+            const right = document.createElement("div");
+            right.className = "shrink-0 flex items-center gap-2";
 
             const date = document.createElement("span");
-            date.className = "text-xs text-black opacity-60";
+            date.className = "text-xs text-black opacity-60 shrink-0";
             date.textContent = c.date || "";
 
+            const report = document.createElement("button");
+            report.type = "button";
+            report.title = "Reportar comentario";
+            report.setAttribute("data-comment-report", "");
+            report.className = "shrink-0 text-red-500 hover:text-red-700 cursor-pointer";
+            report.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="w-4 h-4"><path d="M42.76,50A8,8,0,0,0,40,56V224a8,8,0,0,0,16,0V179.77c26.79-21.16,49.87-9.75,76.45,3.41,16.4,8.11,34.06,16.85,53,16.85,13.93,0,28.54-4.75,43.82-18a8,8,0,0,0,2.76-6V56A8,8,0,0,0,218.76,50c-28,24.23-51.72,12.49-79.21-1.12C111.07,34.76,78.78,18.79,42.76,50Z"></path></svg>';
+
+            right.append(date, report);
+
             const content = document.createElement("p");
-            content.className = "text-sm text-black";
+            content.className = "text-sm text-black whitespace-pre-wrap break-words [overflow-wrap:anywhere]";
             content.textContent = c.content || "";
 
-            head.append(author, date);
+            head.append(author, right);
             item.append(head, content);
             el.comments.appendChild(item);
         });
+    };
+
+    const renderImageComments = (img) => {
+        const list = img.comments || [];
+        if (el.commentsCount) el.commentsCount.textContent = list.length;
+        renderComments(list);
+        if (el.commentForm) el.commentForm.classList.toggle("hidden", !commentsEnabled);
+        if (el.commentsDisabled) el.commentsDisabled.classList.toggle("hidden", commentsEnabled);
+        if (el.commentInput) el.commentInput.value = "";
     };
 
     const open = (data, owner) => {
@@ -155,9 +184,7 @@ if (modal) {
         el.authorImg.src = author.profile_img || "/imgs/profile_img_default.png";
         if (el.profileLink) el.profileLink.href = author.id ? `/profile/${author.id}` : "#";
 
-        const comments = data.comments || [];
-        if (el.commentsCount) el.commentsCount.textContent = comments.length;
-        renderComments(comments);
+        commentsEnabled = data.commentsEnabled !== false;
 
         modal.querySelectorAll("[data-hide-owner]").forEach((node) => node.classList.toggle("hidden", owner));
 
@@ -242,8 +269,49 @@ if (modal) {
         }
     });
 
-    el.commentSend && el.commentSend.addEventListener("click", () => {
+    el.commentSend && el.commentSend.addEventListener("click", async () => {
         if (!authenticated) return requireLogin();
+
+        const img = images[index];
+        if (!img || !img.id || !commentsEnabled) return;
+
+        const content = (el.commentInput && el.commentInput.value || "").trim();
+        if (!content) return;
+
+        el.commentSend.disabled = true;
+
+        try {
+            const res = await fetch(`/upload/images/${img.id}/comment`, {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content }),
+            });
+            const result = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                window.showToast?.(result.message || "No se pudo publicar el comentario.", "error");
+                return;
+            }
+
+            img.comments = img.comments || [];
+            img.comments.push(result.comment);
+            img.commentsCount = img.comments.length;
+            renderImageComments(img);
+
+            if (currentRoot) {
+                currentRoot.dataset.publication = JSON.stringify(currentData);
+                const total = images.reduce((s, im) => s + (im.commentsCount || 0), 0);
+                const cardCount = currentRoot.querySelector("[data-card-comments]");
+                if (cardCount) cardCount.textContent = total;
+            }
+
+            window.showToast?.("Comentario publicado!", "success");
+        } catch {
+            window.showToast?.("Error de red.", "error");
+        } finally {
+            el.commentSend.disabled = false;
+        }
     });
 
     el.interest && el.interest.addEventListener("click", () => {
@@ -260,20 +328,21 @@ if (modal) {
         if (e.key === "Escape" && !modal.classList.contains("hidden")) close();
     });
 
-    document.querySelectorAll("[data-pub]").forEach((root) => {
-        const card = root.querySelector("[data-card]");
+    document.addEventListener("click", (e) => {
+        const card = e.target.closest("[data-card]");
         if (!card) return;
 
-        card.addEventListener("click", () => {
-            let data = {};
-            try {
-                data = JSON.parse(root.dataset.publication || "{}");
-            } catch {
-                data = {};
-            }
-            currentData = data;
-            currentRoot = root;
-            open(data, root.dataset.owner === "true");
-        });
+        const root = card.closest("[data-pub]");
+        if (!root) return;
+
+        let data = {};
+        try {
+            data = JSON.parse(root.dataset.publication || "{}");
+        } catch {
+            data = {};
+        }
+        currentData = data;
+        currentRoot = root;
+        open(data, root.dataset.owner === "true");
     });
 }

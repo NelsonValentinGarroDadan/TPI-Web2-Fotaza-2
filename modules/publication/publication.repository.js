@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { Publication, Image, Tag, Rating, User } = require("../../models");
+const { Publication, Image, Tag, Rating, Comment, User } = require("../../models");
 
 const imagesInclude = {
     model: Image,
@@ -16,6 +16,11 @@ const imagesInclude = {
         model: Rating,
         as: "ratings",
         attributes: ["user_id", "value"],
+    }, {
+        model: Comment,
+        as: "comments",
+        attributes: ["id", "content", "createdAt", "user_id"],
+        include: [{ model: User, as: "user", attributes: ["id", "nickname"] }],
     }],
 };
 
@@ -81,8 +86,10 @@ module.exports = {
 
     getImageById: (id) =>
         Image.findByPk(id, {
-            include: [{ model: Publication, as: "publication", attributes: ["id", "user_id", "deleted"] }],
+            include: [{ model: Publication, as: "publication", attributes: ["id", "user_id", "deleted", "comments_enabled"] }],
         }),
+
+    createComment: (data) => Comment.create(data),
 
     createPublication: (data, transaction) => Publication.create(data, { transaction }),
 

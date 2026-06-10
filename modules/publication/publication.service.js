@@ -50,6 +50,42 @@ const aggregateRatings = (ratings = []) => {
     return { average, count };
 };
 
+const formatDate = (date) => {
+    try {
+        return new Date(date).toLocaleDateString("es-AR");
+    } catch {
+        return "";
+    }
+};
+
+const shapeImage = (img, viewerId) => {
+    const ratings = img.ratings || [];
+    const { average, count } = aggregateRatings(ratings);
+    const mine = ratings.find((r) => r.user_id === viewerId);
+
+    const comments = (img.comments || [])
+        .slice()
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+        .map((c) => ({
+            id: c.id,
+            userId: c.user_id,
+            author: c.user ? c.user.nickname : "usuario",
+            content: c.content,
+            date: formatDate(c.createdAt),
+        }));
+
+    return {
+        id: img.id,
+        url: detailImage(img.url),
+        rating: average,
+        ratingsCount: count,
+        rated: Boolean(mine),
+        myRating: mine ? mine.value : null,
+        comments,
+        commentsCount: comments.length,
+    };
+};
+
 const shapePublication = (p, { authenticated = true, viewerId, withAuthor = false } = {}) => {
     const visible = authenticated
         ? (p.images || [])
@@ -61,19 +97,7 @@ const shapePublication = (p, { authenticated = true, viewerId, withAuthor = fals
         ...new Set(visible.flatMap((i) => (i.tags || []).map((t) => t.title))),
     ];
 
-    const images = visible.map((img) => {
-        const ratings = img.ratings || [];
-        const { average, count } = aggregateRatings(ratings);
-        const mine = ratings.find((r) => r.user_id === viewerId);
-        return {
-            id: img.id,
-            url: detailImage(img.url),
-            rating: average,
-            ratingsCount: count,
-            rated: Boolean(mine),
-            myRating: mine ? mine.value : null,
-        };
-    });
+    const images = visible.map((img) => shapeImage(img, viewerId));
 
     const { average: pubRating, count: pubRatingsCount } = aggregateRatings(
         visible.flatMap((i) => i.ratings || [])
@@ -89,6 +113,8 @@ const shapePublication = (p, { authenticated = true, viewerId, withAuthor = fals
         tags,
         rating: pubRating,
         ratingsCount: pubRatingsCount,
+        commentsEnabled: Boolean(p.comments_enabled),
+        commentsCount: images.reduce((s, im) => s + im.commentsCount, 0),
     };
 
     if (withAuthor) {
@@ -101,6 +127,40 @@ const shapePublication = (p, { authenticated = true, viewerId, withAuthor = fals
     }
 
     return shaped;
+};
+
+const interleaveTiers = (tiers) => {
+    const result = [];
+    const seen = new Set();
+    const pointers = tiers.map((t) => ({ head: 0, tail: t.length - 1 }));
+
+    const pull = (i, fromHead) => {
+        const tier = tiers[i];
+        const p = pointers[i];
+        while (p.head <= p.tail) {
+            const item = tier[fromHead ? p.head++ : p.tail--];
+            if (item && !seen.has(item.id)) {
+                seen.add(item.id);
+                return item;
+            }
+        }
+        return null;
+    };
+
+    let progress = true;
+    while (progress) {
+        progress = false;
+        for (let i = 0; i < tiers.length; i++) {
+            const item = pull(i, true);
+            if (item) { result.push(item); progress = true; }
+        }
+        for (let i = 0; i < tiers.length; i++) {
+            const item = pull(i, false);
+            if (item) { result.push(item); progress = true; }
+        }
+    }
+
+    return result;
 };
 
 module.exports = {
@@ -118,19 +178,7 @@ module.exports = {
                 ...new Set(visible.flatMap((i) => (i.tags || []).map((t) => t.title))),
             ];
 
-            const images = visible.map((img) => {
-                const ratings = img.ratings || [];
-                const { average, count } = aggregateRatings(ratings);
-                const mine = ratings.find((r) => r.user_id === viewerId);
-                return {
-                    id: img.id,
-                    url: detailImage(img.url),
-                    rating: average,
-                    ratingsCount: count,
-                    rated: Boolean(mine),
-                    myRating: mine ? mine.value : null,
-                };
-            });
+            const images = visible.map((img) => shapeImage(img, viewerId));
 
             const { average: pubRating, count: pubRatingsCount } = aggregateRatings(
                 visible.flatMap((i) => i.ratings || [])
@@ -147,6 +195,8 @@ module.exports = {
                 tags,
                 rating: pubRating,
                 ratingsCount: pubRatingsCount,
+                commentsEnabled: Boolean(p.comments_enabled),
+                commentsCount: images.reduce((s, im) => s + im.commentsCount, 0),
                 reportsCount,
                 canEdit: reportsCount === 0,
             });
@@ -171,27 +221,44 @@ module.exports = {
 
         const shaped = publications
             .map((p) => shapePublication(p, { authenticated, viewerId, withAuthor: true }))
+            .filter(Boolean)
+            .sort((a, b) => b.rating - a.rating || b.ratingsCount - a.ratingsCount || a.id - b.id);
+
+        const size = Math.ceil(shaped.length / 3);
+        const tiers = [
+            shaped.slice(0, size),
+            shaped.slice(size, size * 2),
+            shaped.slice(size * 2),
+        ];
+
+        return interleaveTiers(tiers);
+    },
+
+    getSearchFeed: async ({ tags = [], keywords = [], minRating, maxRating } = {}, { authenticated = true, viewerId } = {}) => {
+        const publications = await publicationRepository.getAllPublications();
+
+        let shaped = publications
+            .map((p) => shapePublication(p, { authenticated, viewerId, withAuthor: true }))
             .filter(Boolean);
 
-        const CONSIDERABLE_VOTES = 3;
-        const WELL_RATED = 4;
-
-        const featured = shaped
-            .filter((p) => p.ratingsCount >= CONSIDERABLE_VOTES && p.rating >= WELL_RATED)
-            .sort((a, b) => b.rating - a.rating || b.ratingsCount - a.ratingsCount);
-
-        const featuredIds = new Set(featured.map((p) => p.id));
-        const rest = shaped.filter((p) => !featuredIds.has(p.id));
-
-        const balanced = [];
-        let f = 0;
-        let r = 0;
-        while (f < featured.length || r < rest.length) {
-            for (let k = 0; k < 3 && f < featured.length; k++) balanced.push(featured[f++]);
-            if (r < rest.length) balanced.push(rest[r++]);
+        if (keywords.length) {
+            shaped = shaped.filter((p) => {
+                const haystack = `${p.title || ""} ${p.description || ""}`.toLowerCase();
+                return keywords.every((kw) => haystack.includes(kw));
+            });
         }
 
-        return balanced;
+        if (tags.length) {
+            shaped = shaped.filter((p) => {
+                const pubTags = (p.tags || []).map((t) => t.toLowerCase());
+                return tags.every((t) => pubTags.includes(t));
+            });
+        }
+
+        if (Number.isFinite(minRating)) shaped = shaped.filter((p) => p.rating >= minRating);
+        if (Number.isFinite(maxRating)) shaped = shaped.filter((p) => p.rating <= maxRating);
+
+        return shaped;
     },
 
     getPublicationForEdit: async (id, userId) => {
@@ -220,11 +287,12 @@ module.exports = {
             description: publication.description || "",
             tags,
             images,
+            commentsEnabled: Boolean(publication.comments_enabled),
             canEdit: reportsCount === 0,
         };
     },
 
-    updatePublication: async (id, userId, { title, description, tags }, files, meta) => {
+    updatePublication: async (id, userId, { title, description, tags, commentsEnabled }, files, meta) => {
         if (!title?.trim()) throw new AppError(400, "El titulo es obligatorio.");
 
         const tagNames = parseTags(tags);
@@ -272,11 +340,10 @@ module.exports = {
         }
 
         return sequelize.transaction(async (transaction) => {
-            await publicationRepository.updatePublication(
-                id,
-                { title: title.trim(), description: description?.trim() || null },
-                transaction
-            );
+            const updateData = { title: title.trim(), description: description?.trim() || null };
+            if (typeof commentsEnabled === "boolean") updateData.comments_enabled = commentsEnabled;
+
+            await publicationRepository.updatePublication(id, updateData, transaction);
 
             const tagInstances = await Promise.all(
                 tagNames.map((name) => publicationRepository.findOrCreateTag(name, transaction))
@@ -335,7 +402,32 @@ module.exports = {
         return { rating: average, ratingsCount: count, myRating: score };
     },
 
-    createPublication: async (userId, { title, description, tags }, files, meta) => {
+    createComment: async (imageId, userId, content) => {
+        const image = await publicationRepository.getImageById(imageId);
+        if (!image || !image.publication || image.publication.deleted)
+            throw new AppError(404, "Imagen no encontrada.");
+
+        if (!image.publication.comments_enabled)
+            throw new AppError(403, "Los comentarios estan deshabilitados en esta publicacion.");
+
+        const comment = await publicationRepository.createComment({
+            user_id: userId,
+            image_id: imageId,
+            content,
+        });
+
+        const author = await userRepository.getProfileById(userId);
+
+        return {
+            id: comment.id,
+            userId,
+            author: author ? author.nickname : "usuario",
+            content: comment.content,
+            date: formatDate(comment.createdAt),
+        };
+    },
+
+    createPublication: async (userId, { title, description, tags, commentsEnabled }, files, meta) => {
         if (!title?.trim()) throw new AppError(400, "El titulo es obligatorio.");
         if (!files?.length) throw new AppError(400, "Subi al menos una imagen.");
 
@@ -362,7 +454,12 @@ module.exports = {
 
         return sequelize.transaction(async (transaction) => {
             const publication = await publicationRepository.createPublication(
-                { user_id: userId, title: title.trim(), description: description?.trim() || null },
+                {
+                    user_id: userId,
+                    title: title.trim(),
+                    description: description?.trim() || null,
+                    ...(typeof commentsEnabled === "boolean" ? { comments_enabled: commentsEnabled } : {}),
+                },
                 transaction
             );
 

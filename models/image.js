@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'tag_id',
       });
       Image.hasMany(models.Rating, { as: 'ratings', foreignKey: 'image_id' });
+      Image.hasMany(models.Comment, { as: 'comments', foreignKey: 'image_id' });
     }
   }
   Image.init({

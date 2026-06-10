@@ -1,0 +1,4 @@
+include ./publicationCard.pug
+
+each pub in publications
+    +publicationCard(pub, pub.author, false)

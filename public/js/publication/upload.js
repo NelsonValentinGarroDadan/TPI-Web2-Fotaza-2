@@ -10,6 +10,7 @@ const btnPublish = document.getElementById("btn-publish");
 const titleInput = document.getElementById("title");
 const descInput = document.getElementById("description");
 const tagsInput = document.getElementById("tags");
+const commentsEnabledInput = document.getElementById("comments-enabled");
 
 const pv = {
     title: document.querySelector("[data-pv-title]"),
@@ -46,6 +47,7 @@ const prefillFromBootstrap = () => {
     titleInput.value = pub.title || "";
     descInput.value = pub.description || "";
     tagsInput.value = (pub.tags || []).join(", ");
+    if (commentsEnabledInput) commentsEnabledInput.checked = pub.commentsEnabled !== false;
 
     (pub.images || []).forEach((img) =>
         items.push({
@@ -262,6 +264,7 @@ form.addEventListener("submit", async (e) => {
     payload.append("title", title);
     payload.append("description", description);
     payload.append("tags", tags);
+    payload.append("commentsEnabled", String(commentsEnabledInput ? commentsEnabledInput.checked : true));
 
     const meta = items.map((item) =>
         item.kind === "existing"

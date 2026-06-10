@@ -8,6 +8,10 @@ const router = Router();
 
 router.get("/", publicationController.homeRenderView);
 router.get("/foryou", publicationController.forYouRenderView);
+router.get("/search", publicationController.searchRenderView);
+router.get("/feed/following", publicationController.followingFeed);
+router.get("/feed/foryou", publicationController.forYouFeed);
+router.get("/feed/search", publicationController.searchFeed);
 router.use("/autentication", authRoutes);
 router.use("/profile", userRoutes);
 router.use("/upload", publicationRoutes);
