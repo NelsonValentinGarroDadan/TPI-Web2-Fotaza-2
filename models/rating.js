@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
   class Rating extends Model {
     static associate(models) {
       Rating.belongsTo(models.User, { as: 'user', foreignKey: 'user_id' });
-      Rating.belongsTo(models.Publication, { as: 'publication', foreignKey: 'publication_id' });
+      Rating.belongsTo(models.Image, { as: 'image', foreignKey: 'image_id' });
     }
   }
   Rating.init({
@@ -13,12 +13,12 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       references: { model: 'Users', key: 'id' },
     },
-    publication_id: {
+    image_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: { model: 'Publications', key: 'id' },
+      references: { model: 'Images', key: 'id' },
     },
-    score: {
+    value: {
       type: DataTypes.INTEGER,
       allowNull: false,
       validate: { min: 1, max: 5 },

@@ -11,28 +11,28 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
       },
-      publication_id: {
+      image_id: {
         allowNull: false,
         type: Sequelize.INTEGER,
-        references: { model: 'Publications', key: 'id' },
+        references: { model: 'Images', key: 'id' },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
       },
-      score: { allowNull: false, type: Sequelize.INTEGER },
+      value: { allowNull: false, type: Sequelize.INTEGER },
       createdAt: { allowNull: false, type: Sequelize.DATE },
       updatedAt: { allowNull: false, type: Sequelize.DATE },
     });
 
-    // Una sola valoracion por usuario y publicacion (no se puede editar)
+    // Una sola valoracion por usuario e imagen (no se puede editar)
     await queryInterface.addConstraint('Ratings', {
-      fields: ['user_id', 'publication_id'],
+      fields: ['user_id', 'image_id'],
       type: 'unique',
-      name: 'uq_user_publication_rating',
+      name: 'uq_user_image_rating',
     });
 
     // El puntaje va de 1 a 5
     await queryInterface.sequelize.query(
-      'ALTER TABLE "Ratings" ADD CONSTRAINT chk_score_range CHECK (score BETWEEN 1 AND 5);'
+      'ALTER TABLE "Ratings" ADD CONSTRAINT chk_value_range CHECK (value BETWEEN 1 AND 5);'
     );
   },
 

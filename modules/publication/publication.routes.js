@@ -18,6 +18,6 @@ publicationRoutes.post("/", requireAuth, upload.array("images", 10), publication
 
 publicationRoutes.put("/:id", requireAuth, upload.array("images", 10), publicationController.updatePublication);
 
-publicationRoutes.post("/:id/rating", requireAuth, publicationController.ratePublication);
+publicationRoutes.post("/images/:id/rating", requireAuth, publicationController.rateImage);
 
 module.exports = publicationRoutes;

@@ -13,12 +13,8 @@ mixin publicationCard(pub, author, owner)
             title: pub.title,
             description: pub.description,
             tags: pub.tags || [],
-            images: imgs.map((i) => i.url),
+            images: imgs,
             author: { nickname: author.nickname, profile_img: author.profile_img, id: author.id },
-            rating,
-            ratingsCount: pub.ratingsCount || 0,
-            rated: Boolean(pub.rated),
-            myRating: pub.myRating || null,
         }
 
     div(data-pub data-owner=String(!!owner) data-publication=JSON.stringify(modalData) class="relative")

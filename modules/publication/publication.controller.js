@@ -2,6 +2,14 @@ const publicationService = require("./publication.service.js");
 const userRepository = require("../user/user.repository.js");
 
 module.exports = {
+    homeRenderView: async (req, res) => {
+        const publications = req.user
+            ? await publicationService.getFollowingFeed(req.user.id, { viewerId: req.user.id })
+            : [];
+
+        res.render("home.pug", { publications });
+    },
+
     uploadRenderView: async (req, res) => {
         const author = await userRepository.getProfileById(req.user.id);
 
@@ -59,11 +67,11 @@ module.exports = {
         res.status(201).send({ id: publication.id, message: "Publicacion creada!" });
     },
 
-    ratePublication: async (req, res) => {
-        const result = await publicationService.rate(
+    rateImage: async (req, res) => {
+        const result = await publicationService.rateImage(
             Number(req.params.id),
             req.user.id,
-            req.body.score
+            req.body.value
         );
 
         res.status(201).send({ ...result, message: "Calificacion registrada!" });
