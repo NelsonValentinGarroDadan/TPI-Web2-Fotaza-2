@@ -1,18 +1,13 @@
 extend ./layouts/app.pug
-include ./components/publicationCard.pug
+include ./components/feedGrid.pug
 include ./components/publicationModal.pug
 
 block app
     section(class="flex flex-col items-center w-full py-8 px-4")
         div(class="w-[90vw] max-w-6xl flex flex-col gap-4")
-
-            if !publications || !publications.length
-                p(class="text-sm text-black opacity-60 p-4") Todavia no hay publicaciones para mostrar.
-            else
-                div(class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start")
-                    each pub in publications
-                        +publicationCard(pub, pub.author, false)
+            +feedGrid(publications, endpoint, hasMore, "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3", "Todavia no hay publicaciones para mostrar.")
 
     +publicationModal()
 
+    script(src="/js/feed/infiniteScroll.js" type="module")
     script(src="/js/publication/publicationModal.js" type="module")

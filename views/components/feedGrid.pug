@@ -1,0 +1,18 @@
+include ./publicationCard.pug
+
+mixin feedGrid(publications, endpoint, hasMore, gridClass, emptyMsg)
+    if !publications || !publications.length
+        p(class="text-sm text-black opacity-60 p-4")= emptyMsg || "Todavia no hay publicaciones para mostrar."
+    else
+        div(
+            data-feed-grid
+            data-feed-endpoint=endpoint
+            data-feed-page="1"
+            data-feed-done=String(!hasMore)
+            class=`grid ${gridClass} gap-4 items-start`
+        )
+            each pub in publications
+                +publicationCard(pub, pub.author, false)
+
+        if hasMore
+            div(data-feed-sentinel class="h-8 w-full")
