@@ -64,7 +64,7 @@ module.exports = {
         });
         const { items, hasMore } = paginate(all, 1);
 
-        res.render("home.pug", { publications: items, hasMore, endpoint: "/feed/following" });
+        res.render("publication/home.pug", { publications: items, hasMore, endpoint: "/feed/following" });
     },
 
     followingFeed: async (req, res) => {
@@ -86,7 +86,7 @@ module.exports = {
         });
         const { items, hasMore } = paginate(all, 1);
 
-        res.render("foryou.pug", { publications: items, hasMore, endpoint: "/feed/foryou" });
+        res.render("publication/foryou.pug", { publications: items, hasMore, endpoint: "/feed/foryou" });
     },
 
     forYouFeed: async (req, res) => {
@@ -109,7 +109,7 @@ module.exports = {
         });
         const { items, hasMore } = paginate(all, 1);
 
-        res.render("search.pug", {
+        res.render("publication/search.pug", {
             publications: items,
             hasMore,
             endpoint: searchEndpoint(filters),

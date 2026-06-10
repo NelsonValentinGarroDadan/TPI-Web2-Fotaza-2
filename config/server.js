@@ -30,5 +30,12 @@ app.set(
 
 app.use(router);
 
+app.use((req, res, next) => {
+    if (req.method === "GET" && req.accepts("html")) {
+        return res.status(404).render("404.pug");
+    }
+    res.status(404).json({ status: "error", message: "Recurso no encontrado" });
+});
+
 app.use(errorsHandler);
 module.exports = app;

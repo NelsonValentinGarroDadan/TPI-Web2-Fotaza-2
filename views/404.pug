@@ -1,0 +1,33 @@
+extend ./layouts/main.pug
+include ./components/win-border.pug
+include ./components/icon.pug
+
+block content
+    section(class="min-h-screen flex flex-col items-center justify-center w-full px-4")
+        div(class="w-[90vw] max-w-md bg-white border-2 border-black shadow-[6px_6px_0_0_rgba(0,0,0,0.45)]")
+
+            div(class="flex items-center gap-2 bg-linear-to-r from-blue to-blue-l px-3 py-1")
+                span(class="text-white")
+                    +icon("app-window", "w-5 h-5")
+                h1(class="text-white font-bold text-sm truncate") Error 404 - Fotaza 2
+                div(class="ml-auto flex items-center gap-1 shrink-0")
+                    span(class="w-4 h-4 bg-win-gray-l border border-black text-black text-[10px] leading-none flex items-end justify-center") _
+                    span(class="w-4 h-4 bg-win-gray-l border border-black text-black text-[10px] leading-none flex items-center justify-center") ☐
+                    span(class="w-4 h-4 bg-red-500 border border-black text-white text-[10px] leading-none flex items-center justify-center") ✕
+
+            div(class="flex flex-col items-center gap-5 p-8 text-center")
+
+                div(class="bg-white border-2 border-black p-2 -rotate-3 shadow-[4px_4px_0_0_rgba(0,0,0,0.35)]")
+                    div(class="w-52 h-40 bg-win-gray-l/40 border-2 border-dashed border-win-gray flex flex-col items-center justify-center gap-1 text-win-gray")
+                        +icon("camera", "w-14 h-14")
+                        span(class="text-3xl font-bold text-black leading-none") 404
+                    p(class="text-xs text-black opacity-60 pt-2") imagen_no_encontrada.jpg
+
+                div(class="flex flex-col gap-1")
+                    h2(class="text-xl font-bold text-black") Pagina no encontrada
+                    p(class="text-sm text-black opacity-70") La foto que buscabas se perdio en el rollo.
+
+                +winBorder()
+                    a(href="/" class="flex items-center gap-2 px-6 py-2 bg-blue-l hover:bg-blue text-white text-sm cursor-pointer")
+                        +icon("house", "w-4 h-4")
+                        span Volver al inicio

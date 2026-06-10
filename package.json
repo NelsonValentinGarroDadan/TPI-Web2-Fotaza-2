@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node ./index.js",
     "db:init": "npx sequelize-cli db:migrate",
+    "db:seed": "node ./seeders/seed.js",
     "dev": "node  --watch --trace-warnings ./index.js",
     "dev:css": "tailwindcss -i ./public/css/main.css -o ./public/css/output.css --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
