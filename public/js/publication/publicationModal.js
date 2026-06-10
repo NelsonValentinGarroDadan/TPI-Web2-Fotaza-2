@@ -4,6 +4,7 @@ if (modal) {
     const el = {
         backdrop: modal.querySelector("[data-modal-backdrop]"),
         close: modal.querySelector("[data-modal-close]"),
+        edit: modal.querySelector("[data-pv-edit]"),
         title: modal.querySelector("[data-pv-title]"),
         image: modal.querySelector("[data-pv-image]"),
         bg: modal.querySelector("[data-pv-bg]"),
@@ -18,17 +19,51 @@ if (modal) {
         stars: modal.querySelector("[data-pv-stars]"),
         rating: modal.querySelector("[data-pv-rating]"),
         ratingCount: modal.querySelector("[data-pv-rating-count]"),
+        rateBox: modal.querySelector("[data-pv-rate-box]"),
+        rate: modal.querySelector("[data-pv-rate]"),
+        rateConfirm: modal.querySelector("[data-pv-rate-confirm]"),
+        ratedMsg: modal.querySelector("[data-pv-rated-msg]"),
         comments: modal.querySelector("[data-pv-comments]"),
         commentsCount: modal.querySelector("[data-pv-comments-count]"),
     };
 
     let images = [];
     let index = 0;
+    let currentData = null;
+    let currentRoot = null;
+    let selected = 0;
 
     const stars = (rating) => {
         const full = Math.round(rating);
         return "★".repeat(full) + "☆".repeat(Math.max(0, 5 - full));
     };
+
+    const rateStars = [];
+
+    const paintRate = (n) => {
+        rateStars.forEach((s, i) => {
+            s.textContent = i < n ? "★" : "☆";
+            s.classList.toggle("text-yellow-500", i < n);
+            s.classList.toggle("text-win-gray", i >= n);
+        });
+    };
+
+    if (el.rate) {
+        for (let i = 1; i <= 5; i++) {
+            const star = document.createElement("span");
+            star.className = "text-win-gray cursor-pointer";
+            star.textContent = "☆";
+            star.addEventListener("mouseenter", () => paintRate(i));
+            star.addEventListener("click", () => {
+                selected = i;
+                paintRate(i);
+                if (el.rateConfirm) el.rateConfirm.classList.remove("hidden");
+            });
+            rateStars.push(star);
+            el.rate.appendChild(star);
+        }
+        el.rate.addEventListener("mouseleave", () => paintRate(selected));
+    }
 
     const renderCarousel = () => {
         const single = images.length <= 1;
@@ -103,6 +138,24 @@ if (modal) {
 
         modal.querySelectorAll("[data-hide-owner]").forEach((node) => node.classList.toggle("hidden", owner));
 
+        if (el.edit) {
+            const canEdit = Boolean(owner && data.canEdit && data.id);
+            el.edit.classList.toggle("hidden", !canEdit);
+            el.edit.classList.toggle("flex", canEdit);
+            if (canEdit) el.edit.href = `/upload/${data.id}/edit`;
+        }
+
+        selected = 0;
+        paintRate(0);
+        if (el.rateConfirm) el.rateConfirm.classList.add("hidden");
+
+        const alreadyRated = Boolean(data.rated);
+        if (el.rateBox) el.rateBox.classList.toggle("hidden", owner || alreadyRated);
+        if (el.ratedMsg) {
+            el.ratedMsg.classList.toggle("hidden", owner || !alreadyRated);
+            if (alreadyRated) el.ratedMsg.textContent = `Ya calificaste con ${data.myRating} ★`;
+        }
+
         images = data.images || [];
         index = 0;
         renderCarousel();
@@ -128,6 +181,56 @@ if (modal) {
         renderCarousel();
     });
 
+    el.rateConfirm && el.rateConfirm.addEventListener("click", async () => {
+        if (!currentData || !currentData.id || !selected) return;
+
+        el.rateConfirm.classList.add("hidden");
+
+        try {
+            const res = await fetch(`/upload/${currentData.id}/rating`, {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ score: selected }),
+            });
+            const result = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                window.showToast?.(result.message || "No se pudo calificar.", "error");
+                el.rateConfirm.classList.remove("hidden");
+                return;
+            }
+
+            el.stars.textContent = stars(result.rating);
+            el.rating.textContent = result.rating;
+            el.ratingCount.textContent = `(${result.ratingsCount})`;
+
+            if (el.rateBox) el.rateBox.classList.add("hidden");
+            if (el.ratedMsg) {
+                el.ratedMsg.textContent = `Ya calificaste con ${result.myRating} ★`;
+                el.ratedMsg.classList.remove("hidden");
+            }
+
+            currentData.rated = true;
+            currentData.myRating = result.myRating;
+            currentData.rating = result.rating;
+            currentData.ratingsCount = result.ratingsCount;
+
+            if (currentRoot) {
+                currentRoot.dataset.publication = JSON.stringify(currentData);
+                const cardStars = currentRoot.querySelector("[data-card-stars]");
+                const cardRating = currentRoot.querySelector("[data-card-rating]");
+                if (cardStars) cardStars.textContent = stars(result.rating);
+                if (cardRating) cardRating.textContent = `(${result.rating})`;
+            }
+
+            window.showToast?.("Calificacion registrada!", "success");
+        } catch {
+            window.showToast?.("Error de red.", "error");
+            el.rateConfirm.classList.remove("hidden");
+        }
+    });
+
     el.close && el.close.addEventListener("click", close);
     el.backdrop && el.backdrop.addEventListener("click", close);
     document.addEventListener("keydown", (e) => {
@@ -145,6 +248,8 @@ if (modal) {
             } catch {
                 data = {};
             }
+            currentData = data;
+            currentRoot = root;
             open(data, root.dataset.owner === "true");
         });
     });

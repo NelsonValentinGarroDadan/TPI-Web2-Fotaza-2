@@ -7,7 +7,7 @@ module.exports = {
 
         const [profile, publications] = await Promise.all([
             userService.getProfile(req.user.id),
-            publicationService.getUserPublicationsDetailed(req.user.id),
+            publicationService.getUserPublicationsDetailed(req.user.id, { viewerId: req.user.id }),
         ]);
 
         res.render("user/profile.pug", { profile, publications });
@@ -21,7 +21,7 @@ module.exports = {
 
         const [profile, publications] = await Promise.all([
             userService.getPublicProfile(targetId, req.user.id),
-            publicationService.getUserPublicationsDetailed(targetId, { authenticated: Boolean(req.user) }),
+            publicationService.getUserPublicationsDetailed(targetId, { authenticated: Boolean(req.user), viewerId: req.user?.id }),
         ]);
 
         res.render("user/userProfile.pug", { profile, publications });
