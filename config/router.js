@@ -4,6 +4,7 @@ const userRoutes = require('../modules/user/user.routes.js');
 const publicationRoutes = require('../modules/publication/publication.routes.js');
 const publicationController = require('../modules/publication/publication.controller.js');
 const collectionRoutes = require('../modules/collection/collection.routes.js');
+const reportRoutes = require('../modules/report/report.routes.js');
 const router = Router();
 
 
@@ -17,5 +18,6 @@ router.use("/autentication", authRoutes);
 router.use("/profile", userRoutes);
 router.use("/upload", publicationRoutes);
 router.use("/collections", collectionRoutes);
+router.use("/reports", reportRoutes);
 
 module.exports =  router;

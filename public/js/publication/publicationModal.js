@@ -273,8 +273,8 @@ if (modal) {
         }
 
         const url = reportTarget.type === "comment"
-            ? `/upload/comments/${reportTarget.id}/report`
-            : `/upload/images/${reportTarget.id}/report`;
+            ? `/reports/comments/${reportTarget.id}`
+            : `/reports/images/${reportTarget.id}`;
 
         if (el.reportSubmit) el.reportSubmit.disabled = true;
 

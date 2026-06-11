@@ -58,7 +58,7 @@ const formatDate = (date) => {
     }
 };
 
-const shapeImage = (img, viewerId) => {
+const shapeImage = (img, viewerId, { withCommentReports = false } = {}) => {
     const ratings = img.ratings || [];
     const { average, count } = aggregateRatings(ratings);
     const mine = ratings.find((r) => r.user_id === viewerId);
@@ -66,13 +66,28 @@ const shapeImage = (img, viewerId) => {
     const comments = (img.comments || [])
         .slice()
         .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-        .map((c) => ({
-            id: c.id,
-            userId: c.user_id,
-            author: c.user ? c.user.nickname : "usuario",
-            content: c.content,
-            date: formatDate(c.createdAt),
-        }));
+        .map((c) => {
+            const shaped = {
+                id: c.id,
+                userId: c.user_id,
+                author: c.user ? c.user.nickname : "usuario",
+                content: c.content,
+                date: formatDate(c.createdAt),
+            };
+
+            if (withCommentReports) {
+                const reports = c.reports || [];
+                shaped.reportsCount = reports.length;
+                shaped.reports = reports.map((r) => ({
+                    reason: r.reason,
+                    description: r.description,
+                    reporter: r.user ? r.user.nickname : "usuario",
+                    date: formatDate(r.createdAt),
+                }));
+            }
+
+            return shaped;
+        });
 
     return {
         id: img.id,
@@ -166,6 +181,8 @@ const interleaveTiers = (tiers) => {
 };
 
 module.exports = {
+    shapePublication,
+
     getUserPublicationsDetailed: async (userId, { authenticated = true, viewerId } = {}) => {
         const publications = await publicationRepository.getPublicationsByUser(userId);
 
@@ -180,12 +197,13 @@ module.exports = {
                 ...new Set(visible.flatMap((i) => (i.tags || []).map((t) => t.title))),
             ];
 
-            const images = visible.map((img) => shapeImage(img, viewerId));
+            const isOwner = viewerId === userId;
+            const images = visible.map((img) => shapeImage(img, viewerId, { withCommentReports: isOwner }));
 
             const { average: pubRating, count: pubRatingsCount } = aggregateRatings(
                 visible.flatMap((i) => i.ratings || [])
             );
-            const reportsCount = (p.reports || []).length;
+            const reportsCount = (p.images || []).reduce((s, i) => s + ((i.reports || []).length), 0);
 
             acc.push({
                 id: p.id,
@@ -275,7 +293,7 @@ module.exports = {
         if (publication.user_id !== userId)
             throw new AppError(403, "No podes editar esta publicacion.");
 
-        const reportsCount = (publication.reports || []).length;
+        const reportsCount = (publication.images || []).reduce((s, i) => s + ((i.reports || []).length), 0);
         const images = (publication.images || []).map((img) => ({
             id: img.id,
             url: img.url,
@@ -430,6 +448,19 @@ module.exports = {
             content: comment.content,
             date: formatDate(comment.createdAt),
         };
+    },
+
+    deleteReportedComment: async (commentId, userId) => {
+        const comment = await publicationRepository.getCommentById(commentId);
+        if (!comment || !comment.image || !comment.image.publication || comment.image.publication.deleted)
+            throw new AppError(404, "Comentario no encontrado.");
+
+        if (comment.image.publication.user_id !== userId)
+            throw new AppError(403, "Solo el autor de la publicacion puede borrar sus comentarios.");
+
+        await publicationRepository.deleteComment(commentId);
+
+        return { deleted: true };
     },
 
     createPublication: async (userId, { title, description, tags, commentsEnabled }, files, meta) => {

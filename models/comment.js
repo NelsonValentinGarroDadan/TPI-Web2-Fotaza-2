@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Comment.belongsTo(models.User, { as: 'user', foreignKey: 'user_id' });
       Comment.belongsTo(models.Image, { as: 'image', foreignKey: 'image_id' });
+      Comment.hasMany(models.Report, { as: 'reports', foreignKey: 'comment_id' });
     }
   }
   Comment.init({

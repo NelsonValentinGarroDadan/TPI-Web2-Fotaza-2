@@ -216,4 +216,13 @@ module.exports = {
 
         res.status(201).send({ comment, message: "Comentario publicado!" });
     },
+
+    deleteComment: async (req, res) => {
+        const result = await publicationService.deleteReportedComment(
+            Number(req.params.id),
+            req.user.id
+        );
+
+        res.status(200).send({ ...result, message: "Comentario eliminado." });
+    },
 };

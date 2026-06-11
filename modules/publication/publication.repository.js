@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { Publication, Image, Tag, Rating, Comment, User } = require("../../models");
+const { Publication, Image, Tag, Rating, Comment, User, Report } = require("../../models");
 
 const imagesInclude = {
     model: Image,
@@ -17,10 +17,23 @@ const imagesInclude = {
         as: "ratings",
         attributes: ["user_id", "value"],
     }, {
+        model: Report,
+        as: "reports",
+        attributes: ["id", "user_id"],
+    }, {
         model: Comment,
         as: "comments",
         attributes: ["id", "content", "createdAt", "user_id"],
-        include: [{ model: User, as: "user", attributes: ["id", "nickname"] }],
+        include: [{
+            model: User,
+            as: "user",
+            attributes: ["id", "nickname"],
+        }, {
+            model: Report,
+            as: "reports",
+            attributes: ["id", "user_id", "reason", "description", "createdAt"],
+            include: [{ model: User, as: "user", attributes: ["id", "nickname"] }],
+        }],
     }],
 };
 
@@ -52,6 +65,17 @@ module.exports = {
             order: [["createdAt", "DESC"]],
         }),
 
+    getPublicationsByIds: (ids) =>
+        ids.length
+            ? Publication.findAll({
+                where: { id: { [Op.in]: ids }, deleted: false },
+                include: [
+                    { model: User, as: "author", attributes: ["id", "nickname", "profile_img"] },
+                    imagesInclude,
+                ],
+            })
+            : Promise.resolve([]),
+
     getPublicationById: (id) => Publication.findByPk(id),
 
     getPublicationWithImages: (id) =>
@@ -65,6 +89,10 @@ module.exports = {
                     as: "tags",
                     attributes: ["title"],
                     through: { attributes: [] },
+                }, {
+                    model: Report,
+                    as: "reports",
+                    attributes: ["id"],
                 }],
             }],
             order: [[{ model: Image, as: "images" }, "order_number", "ASC"]],
@@ -90,6 +118,18 @@ module.exports = {
         }),
 
     createComment: (data) => Comment.create(data),
+
+    getCommentById: (id) =>
+        Comment.findByPk(id, {
+            include: [{
+                model: Image,
+                as: "image",
+                attributes: ["id"],
+                include: [{ model: Publication, as: "publication", attributes: ["id", "user_id", "deleted"] }],
+            }],
+        }),
+
+    deleteComment: (id) => Comment.destroy({ where: { id } }),
 
     createPublication: (data, transaction) => Publication.create(data, { transaction }),
 

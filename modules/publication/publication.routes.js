@@ -16,12 +16,16 @@ publicationRoutes.get("/", requireAuthPage("auth"), publicationController.upload
 
 publicationRoutes.get("/:id/edit", requireAuthPage("auth"), publicationController.editRenderView);
 
-publicationRoutes.post("/", requireAuth, upload.array("images", 10), publicationController.createPublication);
+publicationRoutes.use(requireAuth)
 
-publicationRoutes.put("/:id", requireAuth, upload.array("images", 10), publicationController.updatePublication);
+publicationRoutes.post("/", upload.array("images", 10), publicationController.createPublication);
 
-publicationRoutes.post("/images/:id/rating", requireAuth, ValidatorHandler(ratingDTO), publicationController.rateImage);
+publicationRoutes.put("/:id", upload.array("images", 10), publicationController.updatePublication);
 
-publicationRoutes.post("/images/:id/comment", requireAuth, ValidatorHandler(commentDTO), publicationController.createComment);
+publicationRoutes.post("/images/:id/rating", ValidatorHandler(ratingDTO), publicationController.rateImage);
+
+publicationRoutes.post("/images/:id/comment", ValidatorHandler(commentDTO), publicationController.createComment);
+
+publicationRoutes.delete("/comments/:id", publicationController.deleteComment);
 
 module.exports = publicationRoutes;
