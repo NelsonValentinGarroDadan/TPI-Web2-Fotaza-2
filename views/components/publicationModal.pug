@@ -24,6 +24,22 @@ mixin publicationModal()
                         class="hidden items-center justify-center bg-win-gray-l hover:bg-win-gray text-white border-2 border-black cursor-pointer px-1"
                     )
                         +icon("gear", "h-4 w-4")
+                    div(data-pv-save-wrap class="hidden relative")
+                        button(
+                            type="button"
+                            data-pv-save
+                            title="Guardar en coleccion"
+                            class="flex items-center justify-center h-5 bg-win-gray-l hover:bg-win-gray text-white border-2 border-black cursor-pointer py-2 px-1"
+                        )
+                            span(data-pv-save-add class="flex items-center justify-center")
+                                +icon("list-plus", "h-4 w-4")
+                            span(data-pv-save-remove class="hidden items-center justify-center")
+                                +icon("sort-ascending", "h-4 w-4")
+                        div(data-pv-save-pop class="hidden absolute z-50 right-0 top-full mt-1 w-64 bg-white border-2 border-black p-2 flex flex-col gap-2 max-h-72 overflow-y-auto text-left")
+                            div(data-pv-save-list class="flex flex-col gap-1")
+                            form(data-pv-save-form class="flex items-center gap-1 border-t border-win-gray pt-2")
+                                input(data-pv-save-name type="text" maxlength="50" placeholder="Nueva coleccion" class="flex-1 min-w-0 text-sm text-black border border-black px-2 py-1 outline-none focus:border-blue")
+                                button(type="submit" title="Crear y guardar" class="shrink-0 px-3 py-1 bg-blue-l hover:bg-blue text-white text-sm border border-black cursor-pointer") +
                     button(
                         type="button"
                         data-modal-close
@@ -94,3 +110,35 @@ mixin publicationModal()
                                         button(type="button" data-pv-comment-send class="px-4 py-1 bg-win-gray/30 hover:bg-win-gray/50 text-sm text-black cursor-pointer") Comentar
                             p(data-pv-comments-disabled class="hidden text-xs text-black opacity-60") Los comentarios estan deshabilitados en esta publicacion.
                         div(data-pv-comments class="w-[50%] min-w-0 min-h-0 overflow-y-auto flex flex-col gap-2")
+
+        div(data-report-dialog class="hidden absolute inset-0 z-50 items-center justify-center p-4")
+            div(data-report-backdrop class="absolute inset-0 bg-black/60")
+
+            div(class="relative w-[90vw] max-w-md flex flex-col bg-bk border-2 border-black")
+                div(class="flex items-center justify-between gap-2 bg-linear-to-r from-blue to-blue-l px-3 py-1")
+                    h3(data-report-title class="text-white font-bold text-sm") Denunciar
+                    button(
+                        type="button"
+                        data-report-cancel
+                        class="flex items-center justify-center h-5 bg-red-500 hover:bg-red-700 text-white border-2 border-black cursor-pointer py-2 px-1"
+                    ) ✕
+
+                div(class="p-4 flex flex-col gap-3")
+                    div(class="flex flex-col gap-1")
+                        label(class="text-sm font-bold text-black") Motivo
+                        select(data-report-reason class="w-full border-2 border-black text-sm text-black px-2 py-1 bg-white")
+                            option(value="inapropiado") Contenido inapropiado
+                            option(value="spam") Spam o enganoso
+                            option(value="derechos") Derechos de autor
+                            option(value="violencia") Violencia o contenido sensible
+                            option(value="otro") Otro
+                    div(class="flex flex-col gap-1")
+                        label(class="text-sm font-bold text-black") Descripcion
+                        +winBorder("w-full")
+                            textarea(data-report-description maxlength="250" class="w-full h-20 resize-none text-sm text-black px-2 py-1" placeholder="Conta por que estas denunciando...")
+                    p(data-report-error class="hidden text-sm text-red-500")
+                    div(class="flex justify-end gap-2")
+                        +winBorder()
+                            button(type="button" data-report-cancel class="px-4 py-1 bg-win-gray/30 hover:bg-win-gray/50 text-sm text-black cursor-pointer") Cancelar
+                        +winBorder()
+                            button(type="button" data-report-submit class="px-4 py-1 bg-red-500 hover:bg-red-700 text-sm text-white border border-black cursor-pointer") Enviar denuncia

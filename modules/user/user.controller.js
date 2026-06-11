@@ -1,16 +1,18 @@
 const userService = require("./user.service.js");
 const publicationService = require("../publication/publication.service.js");
+const collectionService = require("../collection/collection.service.js");
 
 module.exports = {
     profileRenderView: async (req, res) => {
         if (!req.user) return res.redirect("/autentication/login");
 
-        const [profile, publications] = await Promise.all([
+        const [profile, publications, collections] = await Promise.all([
             userService.getProfile(req.user.id),
             publicationService.getUserPublicationsDetailed(req.user.id, { viewerId: req.user.id }),
+            collectionService.getUserCollections(req.user.id),
         ]);
 
-        res.render("user/profile.pug", { profile, publications });
+        res.render("user/profile.pug", { profile, publications, collections });
     },
 
     userProfileRenderView: async (req, res) => {

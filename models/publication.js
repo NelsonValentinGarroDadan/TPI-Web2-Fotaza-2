@@ -5,6 +5,12 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Publication.belongsTo(models.User, { as: 'author', foreignKey: 'user_id' });
       Publication.hasMany(models.Image, { as: 'images', foreignKey: 'publication_id' });
+      Publication.belongsToMany(models.Collection, {
+        through: 'collections_publications',
+        as: 'collections',
+        foreignKey: 'publication_id',
+        otherKey: 'collection_id',
+      });
     }
   }
   Publication.init({

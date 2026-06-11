@@ -8,18 +8,19 @@ const { updateProfileDTO } = require('./user.dto');
 const userRoutes = Router();
 
 userRoutes.get("/", requireAuthPage("auth"), userController.profileRenderView);
- 
+
+userRoutes.get("/:id", requireAuthPage("auth"), userController.userProfileRenderView);
+
+userRoutes.use(requireAuth)
 userRoutes.put(
-    "/",
-    requireAuth,
+    "/", 
     uploadHandler("Fotaza-2")("profile_img"),
     ValidatorHandler(updateProfileDTO),
     userController.updateProfile
 );
 
-userRoutes.get("/:id", requireAuthPage("auth"), userController.userProfileRenderView);
+userRoutes.post("/:id/follow", userController.follow);
 
-userRoutes.post("/:id/follow", requireAuth, userController.follow);
-userRoutes.delete("/:id/follow", requireAuth, userController.unfollow);
+userRoutes.delete("/:id/follow", userController.unfollow);
 
 module.exports = userRoutes;

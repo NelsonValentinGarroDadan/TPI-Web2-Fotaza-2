@@ -100,7 +100,7 @@ block app
 
         div(class="w-[70vw] flex items-stretch gap-1 mt-4")
             +navItem("btn-publications", "app-window", "Publicaciones", true, false, null, null, "px-5")
-            +navItem("btn-collection", "squares-four", "Coleccion", false, false, null, null, "px-5")
+            +navItem("btn-collection", "list-bullets", "Coleccion", false, false, null, null, "px-5")
 
         div#tab-content(class="w-[70vw] mt-2")
             div#panel-publications
@@ -112,9 +112,86 @@ block app
                             +publicationCard(pub, profile, true)
 
             div#panel-collection(class="hidden")
-                p(class="text-sm text-black opacity-60 p-4") Todavia no tenes colecciones.
+                div(data-collections-list)
+                    div(class="flex items-center justify-between gap-2 mb-3")
+                        h3(class="text-lg font-bold text-black") Mis colecciones
+                        +winBorder()
+                            button(
+                                type="button"
+                                data-collection-new
+                                class="px-4 py-2 bg-blue-l hover:bg-blue text-sm text-white border border-black cursor-pointer"
+                            ) + Nueva coleccion
+
+                    form(data-collection-form class="hidden flex flex-col sm:flex-row items-start gap-2 mb-4 p-3 bg-white border-2 border-black")
+                        div(class="flex-1 w-full flex flex-col gap-1")
+                            input(
+                                data-collection-name
+                                type="text"
+                                maxlength="50"
+                                placeholder="Nombre de la coleccion"
+                                class="w-full text-sm text-black px-2 py-2 border border-black outline-none focus:border-blue"
+                            )
+                            span(data-collection-error class="block text-red-500 text-sm h-4")
+                        div(class="flex items-center gap-2 shrink-0")
+                            +winBorder()
+                                button(type="submit" class="px-4 py-2 bg-blue-l hover:bg-blue text-sm text-white border border-black cursor-pointer") Crear
+                            +winBorder()
+                                button(type="button" data-collection-cancel class="px-4 py-2 bg-win-gray/30 hover:bg-win-gray/50 text-sm text-black cursor-pointer") Cancelar
+
+                    if !collections || !collections.length
+                        p(class="text-sm text-black opacity-60 p-4") Todavia no tenes colecciones. Crea una y guarda las publicaciones que mas te gusten.
+                    else
+                        div(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start")
+                            each col in collections
+                                div(class="relative")
+                                    button(
+                                        type="button"
+                                        data-collection-delete
+                                        data-id=col.id
+                                        title="Eliminar coleccion"
+                                        class="absolute top-1 right-1 z-10 flex items-center justify-center w-6 h-6 bg-red-500 hover:bg-red-700 text-white border-2 border-black cursor-pointer leading-none"
+                                    ) ✕
+                                    button(
+                                        type="button"
+                                        data-collection-open
+                                        data-id=col.id
+                                        data-name=col.name
+                                        class="group w-full text-left bg-white border-2 border-black cursor-pointer flex flex-col overflow-hidden"
+                                    )
+                                        div(class="shrink-0 bg-linear-to-r from-blue to-blue-l px-3 py-1")
+                                            h3(class="text-white font-bold text-sm truncate")= col.name
+                                        div(class="relative aspect-4/3 overflow-hidden bg-win-gray-l/40")
+                                            if col.cover
+                                                img(src=col.cover alt=col.name class="w-full h-full object-cover transition-none group-hover:scale-105")
+                                            else
+                                                div(class="w-full h-full flex items-center justify-center")
+                                                    +icon("list-bullets", "w-10 h-10 opacity-30")
+                                        div(class="shrink-0 p-3")
+                                            span(class="text-xs text-black opacity-60") #{col.count} #{col.count === 1 ? "publicacion" : "publicaciones"}
 
     +publicationModal()
+
+    div(data-collection-modal class="hidden fixed inset-0 z-40 items-center justify-center p-4")
+        div(data-collection-modal-backdrop class="absolute inset-0 bg-black/60")
+
+        div(class="relative w-[90vw] max-w-6xl h-[90vh] flex flex-col overflow-hidden bg-bk border-2 border-black")
+            div(class="w-full flex items-center justify-between gap-2 bg-linear-to-r from-blue to-blue-l px-3 py-1")
+                h2(data-collection-modal-title class="text-white font-bold text-sm truncate") Coleccion
+                button(
+                    type="button"
+                    data-collection-modal-close
+                    class="flex items-center justify-center h-5 bg-red-500 hover:bg-red-700 text-white border-2 border-black cursor-pointer py-2 px-1"
+                ) ✕
+
+            div(class="flex-1 min-h-0 overflow-y-auto p-4")
+                each col in collections
+                    div(data-collection-group data-id=col.id class="hidden")
+                        if !col.publications.length
+                            p(class="text-sm text-black opacity-60 p-4") Esta coleccion esta vacia. Guarda publicaciones con el boton de coleccion en el detalle de cada una.
+                        else
+                            div(class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start")
+                                each pub in col.publications
+                                    +publicationCard(pub, pub.author, Boolean(user) && pub.author && pub.author.id === user.id)
 
     script(src="/js/helpers/errors.js" type="module")
     script(src="/js/helpers/validator.js" type="module")
