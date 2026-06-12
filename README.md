@@ -133,4 +133,5 @@ Tuve problemas con el tamaño de las imagenes, sobre todo en la foto de perfil y
 
 
 
-[![Deploy](https://img.shields.io/badge/Deploy-Fotaza%202-blue)](https://fotaza-2-21ji.onrender.com/)
+## Deploy
+ <a href="https://fotaza-2-21ji.onrender.com/" > Fotaza 2 </a>
