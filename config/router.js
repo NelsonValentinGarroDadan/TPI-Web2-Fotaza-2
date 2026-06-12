@@ -7,6 +7,7 @@ const collectionRoutes = require('../modules/collection/collection.routes.js');
 const reportRoutes = require('../modules/report/report.routes.js');
 const messageRoutes = require('../modules/message/message.routes.js');
 const notificationRoutes = require('../modules/notification/notification.routes.js');
+const adminRoutes = require('../modules/admin/admin.routes.js');
 const router = Router();
 
 
@@ -23,5 +24,6 @@ router.use("/collections", collectionRoutes);
 router.use("/reports", reportRoutes);
 router.use("/messages", messageRoutes);
 router.use("/notifications", notificationRoutes);
+router.use("/dashboar-admin", adminRoutes);
 
 module.exports =  router;

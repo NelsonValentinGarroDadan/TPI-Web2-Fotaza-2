@@ -44,11 +44,13 @@ form.addEventListener("submit", async (e) => {
         return;
     }
 
-    localStorage.setItem('user', JSON.stringify(response.data.user)); 
+    localStorage.setItem('user', JSON.stringify(response.data.user));
     button.textContent = "Inicio de sesion exitoso";
     button.style.background = "green";
 
+    const destination = response.data.user?.is_admin ? "/dashboar-admin" : "/";
+
     setTimeout(() => {
-        window.location.href = "/";
+        window.location.href = destination;
     }, 1000);
 });

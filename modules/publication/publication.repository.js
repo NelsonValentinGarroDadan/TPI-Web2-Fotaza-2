@@ -78,6 +78,9 @@ module.exports = {
 
     getPublicationById: (id) => Publication.findByPk(id),
 
+    countTakedowns: (userId) =>
+        Publication.count({ where: { user_id: userId, deleted: true } }),
+
     getPublicationWithImages: (id) =>
         Publication.findByPk(id, {
             include: [{

@@ -11,7 +11,7 @@ userRoutes.get("/", requireAuthPage("auth"), userController.profileRenderView);
 
 userRoutes.get("/:id", requireAuthPage("auth"), userController.userProfileRenderView);
 
-userRoutes.use(requireAuth)
+userRoutes.use(requireAuth())
 userRoutes.put(
     "/", 
     uploadHandler("Fotaza-2")("profile_img"),

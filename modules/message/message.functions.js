@@ -18,6 +18,7 @@ const shapeHeader = (conv, viewerId) => {
         id: conv.id,
         imageId: conv.image_id,
         imageThumb: conv.image ? cardImage(conv.image.url) : null,
+        closed: Boolean(conv.image && conv.image.publication && conv.image.publication.deleted),
         role: isBuyer ? "buyer" : "seller",
         other: {
             id: other ? other.id : null,

@@ -5,7 +5,7 @@ const ValidatorHandler = require('../../middlewares/validatorHandler');
 const { interestDTO, sendMessageDTO } = require('./message.dto');
 const messageRoutes = Router();
 
-messageRoutes.use(requireAuth);
+messageRoutes.use(requireAuth());
 
 messageRoutes.post("/interest", ValidatorHandler(interestDTO), messageController.interest);
 

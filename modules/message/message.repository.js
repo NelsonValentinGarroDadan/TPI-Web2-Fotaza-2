@@ -1,10 +1,15 @@
 const { Op } = require("sequelize");
-const { Conversation, Message, Image, User } = require("../../models");
+const { Conversation, Message, Image, User, Publication } = require("../../models");
 
 const userAttrs = ["id", "nickname", "profile_img"];
 
 const conversationParties = [
-    { model: Image, as: "image", attributes: ["id", "url"] },
+    {
+        model: Image,
+        as: "image",
+        attributes: ["id", "url"],
+        include: [{ model: Publication, as: "publication", attributes: ["id", "deleted"] }],
+    },
     { model: User, as: "buyer", attributes: userAttrs },
     { model: User, as: "seller", attributes: userAttrs },
 ];

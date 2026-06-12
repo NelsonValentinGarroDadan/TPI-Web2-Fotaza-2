@@ -1,0 +1,100 @@
+extend ../layouts/admin.pug
+include ../components/win-border.pug
+include ../components/icon.pug
+
+block adminContent
+    div(class="flex flex-col gap-1 mb-6")
+        h1(class="text-2xl font-bold text-black") Lista de trabajo
+        p(class="text-sm text-black opacity-60") Publicaciones con mas de 3 denuncias de usuarios distintos. Dalas de baja o desestima las denuncias (una o todas).
+
+    if !queue.length
+        div(class="bg-white border-2 border-black p-8 text-center")
+            p(class="text-sm text-black opacity-70") No hay publicaciones pendientes de revision. Todo en orden.
+    else
+        div(class="flex flex-col gap-5" data-queue)
+            each item in queue
+                article(
+                    class="bg-white border-2 border-black overflow-hidden"
+                    data-queue-item
+                    data-image-id=item.imageId
+                    data-publication-id=item.publication.id
+                )
+                    div(class="flex items-center justify-between gap-2 bg-linear-to-r from-blue to-blue-l px-3 py-1")
+                        h2(class="text-white font-bold text-sm truncate")= item.publication.title
+                        span(
+                            data-report-count
+                            class="shrink-0 bg-white/90 border border-black text-xs font-bold text-black px-2 py-0.5"
+                        )= `${item.reportCount} denuncias`
+
+                    div(class="flex flex-col md:flex-row gap-4 p-4")
+                        div(class="md:w-56 shrink-0")
+                            div(class="relative aspect-4/3 overflow-hidden bg-win-gray-l/40 border-2 border-black")
+                                img(src=item.url alt=item.publication.title class="w-full h-full object-cover")
+
+                        div(class="flex-1 flex flex-col gap-3 min-w-0")
+                            div(class="flex items-center gap-2")
+                                img(
+                                    src=(item.author.profile_img || "/imgs/profile_img_default.png")
+                                    alt=item.author.nickname
+                                    class="w-8 h-8 object-cover border-2 border-black shrink-0"
+                                )
+                                div(class="flex flex-col leading-tight min-w-0")
+                                    span(class="text-[11px] text-black opacity-50") Publicado por
+                                    span(class="text-sm font-bold text-black truncate") @#{item.author.nickname}
+                                if !item.author.active
+                                    span(class="ml-auto shrink-0 px-2 py-0.5 bg-red-500 text-white text-[10px] border border-black") cuenta inactiva
+
+                            div(class="flex flex-col gap-0.5")
+                                span(class="text-[11px] text-black opacity-50") Descripcion
+                                p(class="text-sm text-black")= item.publication.description || "Sin descripcion."
+
+                            div(class="flex flex-col gap-1")
+                                span(class="text-[11px] text-black opacity-50") Denuncias
+                                ul(class="flex flex-col gap-2" data-reports)
+                                    each report in item.reports
+                                        li(class="flex items-start gap-2 bg-win-gray-l/30 border border-win-gray/50 p-2" data-report-id=report.id)
+                                            div(class="flex-1 min-w-0")
+                                                div(class="flex items-center gap-2 flex-wrap")
+                                                    span(class="px-1.5 py-0.5 bg-red-100 border border-black text-[11px] font-bold text-black uppercase")= report.reason
+                                                    span(class="text-[11px] text-black opacity-50") @#{report.reporter}
+                                                p(class="text-sm text-black opacity-80 mt-1")= report.description
+                                            button(
+                                                type="button"
+                                                data-action="dismiss-report"
+                                                title="Desestimar esta denuncia"
+                                                class="shrink-0 flex items-center justify-center w-6 h-6 bg-win-gray/30 hover:bg-win-gray/60 text-black border border-black cursor-pointer leading-none"
+                                            ) ✕
+
+                            div(class="flex items-center gap-2 mt-auto pt-3 border-t border-win-gray")
+                                +winBorder()
+                                    button(
+                                        type="button"
+                                        data-action="takedown"
+                                        class="px-4 py-2 bg-red-500 hover:bg-red-700 text-sm text-white border border-black cursor-pointer"
+                                    ) Dar de baja
+                                +winBorder()
+                                    button(
+                                        type="button"
+                                        data-action="dismiss"
+                                        class="px-4 py-2 bg-win-gray/30 hover:bg-win-gray/50 text-sm text-black cursor-pointer"
+                                    ) Desestimar todas
+
+    div(data-confirm class="fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-150")
+        div(data-confirm-cancel class="absolute inset-0 bg-black/60")
+        div(class="relative w-[90vw] max-w-sm flex flex-col bg-bk border-2 border-black")
+            div(class="flex items-center justify-between gap-2 bg-linear-to-r from-blue to-blue-l px-3 py-1")
+                h3(class="text-white font-bold text-sm") Confirmar accion
+                button(
+                    type="button"
+                    data-confirm-cancel
+                    class="flex items-center justify-center h-5 bg-red-500 hover:bg-red-700 text-white border-2 border-black cursor-pointer py-2 px-1"
+                ) ✕
+            div(class="p-4 flex flex-col gap-4")
+                p(data-confirm-message class="text-sm text-black")
+                div(class="flex justify-end gap-2")
+                    +winBorder()
+                        button(type="button" data-confirm-cancel class="px-4 py-1 bg-win-gray/30 hover:bg-win-gray/50 text-sm text-black cursor-pointer") Cancelar
+                    +winBorder()
+                        button(type="button" data-confirm-ok class="px-4 py-1 bg-red-500 hover:bg-red-700 text-sm text-white border border-black cursor-pointer") Confirmar
+
+    script(src="/js/admin/dashboard.js" type="module")

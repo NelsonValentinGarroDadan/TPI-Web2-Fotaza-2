@@ -225,4 +225,15 @@ module.exports = {
 
         res.status(200).send({ ...result, message: "Comentario eliminado." });
     },
+
+    takedown: async (req, res) => {
+        const result = await publicationService.takedown(Number(req.params.id));
+
+        res.status(200).send({
+            ...result,
+            message: result.accountBlocked
+                ? "Publicacion dada de baja. La cuenta del usuario fue inactivada."
+                : "Publicacion dada de baja.",
+        });
+    },
 };

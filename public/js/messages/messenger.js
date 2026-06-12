@@ -17,6 +17,7 @@ if (root && window.io) {
         messages: root.querySelector("[data-msg-messages]"),
         form: root.querySelector("[data-msg-form]"),
         input: root.querySelector("[data-msg-input]"),
+        closed: root.querySelector("[data-msg-closed]"),
     };
 
     const OPEN_KEY = "fotaza_messenger_open";
@@ -171,13 +172,17 @@ if (root && window.io) {
             if (el.chatAvatar) el.chatAvatar.src = header.other.profile_img || "/imgs/profile_img_default.png";
             if (el.chatThumb) el.chatThumb.src = header.imageThumb || "";
 
+            const isClosed = Boolean(header.closed);
+            if (el.form) el.form.classList.toggle("hidden", isClosed);
+            if (el.closed) el.closed.classList.toggle("hidden", !isClosed);
+
             (data.messages || []).forEach(appendMessage);
 
             const conv = conversations.find((c) => c.id === id);
             if (conv) { conv.unread = 0; renderBadge(); }
             socket.emit("conversation:read", { conversationId: id });
 
-            if (el.input) el.input.focus();
+            if (!isClosed && el.input) el.input.focus();
         } catch {
             window.showToast?.("Error de red.", "error");
             showList();

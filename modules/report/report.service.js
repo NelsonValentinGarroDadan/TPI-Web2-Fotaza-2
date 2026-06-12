@@ -2,8 +2,36 @@ const reportRepository = require("./report.repository");
 const publicationRepository = require("../publication/publication.repository");
 const notificationService = require("../notification/notification.service");
 const AppError = require("../../errors/appError");
+const { buildQueueItem } = require("./report.functions");
 
 module.exports = {
+    getModerationQueue: async () => {
+        const flaggedIds = await reportRepository.getFlaggedImageIds();
+        const images = await reportRepository.getImagesWithReports(flaggedIds);
+
+        return images.map(buildQueueItem);
+    },
+
+    dismissImageReports: async (imageId) => {
+        const removed = await reportRepository.deleteImageReports(imageId);
+        if (!removed) throw new AppError(404, "No hay denuncias para esta imagen.");
+
+        return { dismissed: true, removed };
+    },
+
+    dismissReport: async (reportId) => {
+        const report = await reportRepository.getReportById(reportId);
+        if (!report) throw new AppError(404, "Denuncia no encontrada.");
+
+        await reportRepository.deleteReport(reportId);
+
+        const stillFlagged = report.image_id
+            ? await reportRepository.isImageStillFlagged(report.image_id)
+            : false;
+
+        return { dismissed: true, stillFlagged };
+    },
+
     reportImage: async (imageId, userId, { reason, description }) => {
         const image = await publicationRepository.getImageById(imageId);
         if (!image || !image.publication || image.publication.deleted)

@@ -20,4 +20,16 @@ module.exports = {
 
         res.status(201).send({ ...result, message: "Denuncia registrada!" });
     },
+
+    dismissImageReports: async (req, res) => {
+        const result = await reportService.dismissImageReports(Number(req.params.id));
+
+        res.status(200).send({ ...result, message: "Denuncias desestimadas." });
+    },
+
+    dismissReport: async (req, res) => {
+        const result = await reportService.dismissReport(Number(req.params.id));
+
+        res.status(200).send({ ...result, message: "Denuncia desestimada." });
+    },
 };

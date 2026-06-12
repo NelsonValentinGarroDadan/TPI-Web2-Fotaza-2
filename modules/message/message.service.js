@@ -99,6 +99,10 @@ module.exports = {
         const conv = await messageRepository.getRawConversation(conversationId);
         assertParticipant(conv, userId);
 
+        const image = await publicationRepository.getImageById(conv.image_id);
+        if (!image || !image.publication || image.publication.deleted)
+            throw new AppError(403, "La publicacion fue dada de baja por denuncias. La conversacion esta cerrada.");
+
         const recipientId = conv.buyer_id === userId ? conv.seller_id : conv.buyer_id;
         const message = await messageRepository.createMessage({
             conversation_id: conversationId,

@@ -1,0 +1,27 @@
+extend ./main.pug
+include ../components/win-border.pug
+include ../components/icon.pug
+
+block content
+    header(class="bg-white flex items-center justify-between gap-4 px-4 py-3 border-b-2 border-black")
+        div(class="flex items-center gap-2")
+            img(
+                src="/icons/camera.svg"
+                alt="logo-fotaza2"
+                class="w-9 h-9 p-1 bg-blue border-2 border-black"
+            )
+            div(class="flex flex-col leading-tight")
+                p(class="text-lg text-black font-bold") Fotaza 2
+                p(class="text-xs text-black opacity-60") Panel del validador de contenidos
+
+        +winBorder()
+            button(
+                id="btn-logout"
+                class="px-3 py-2 bg-win-gray/30 hover:bg-win-gray/50 text-sm text-black cursor-pointer"
+            ) Cerrar Sesion
+        
+
+    section(class="w-full max-w-6xl mx-auto px-4 py-6")
+        block adminContent
+
+    script(src="/js/auth/logout.js")

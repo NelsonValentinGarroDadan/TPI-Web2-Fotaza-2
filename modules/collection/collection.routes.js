@@ -5,7 +5,7 @@ const ValidatorHandler = require('../../middlewares/validatorHandler');
 const { createCollectionDTO, addPublicationDTO } = require('./collection.dto');
 const collectionRoutes = Router();
 
-collectionRoutes.use(requireAuth);
+collectionRoutes.use(requireAuth());
 
 collectionRoutes.get("/",collectionController.list);
 

@@ -14,7 +14,26 @@ const {
     interleaveTiers,
 } = require("./publication.functions");
 
+const TAKEDOWN_LIMIT = 3;
+
 module.exports = {
+    takedown: async (publicationId) => {
+        const publication = await publicationRepository.getPublicationById(publicationId);
+        if (!publication || publication.deleted)
+            throw new AppError(404, "Publicacion no encontrada o ya dada de baja.");
+
+        await publicationRepository.updatePublication(publicationId, { deleted: true });
+
+        const takedowns = await publicationRepository.countTakedowns(publication.user_id);
+
+        let accountBlocked = false;
+        if (takedowns >= TAKEDOWN_LIMIT) {
+            await userRepository.updateUser(publication.user_id, { active: false });
+            accountBlocked = true;
+        }
+
+        return { takenDown: true, takedowns, accountBlocked };
+    },
     getUserPublicationsDetailed: async (userId, { authenticated = true, viewerId } = {}) => {
         const publications = await publicationRepository.getPublicationsByUser(userId);
 

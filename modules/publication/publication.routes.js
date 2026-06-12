@@ -16,7 +16,7 @@ publicationRoutes.get("/", requireAuthPage("auth"), publicationController.upload
 
 publicationRoutes.get("/:id/edit", requireAuthPage("auth"), publicationController.editRenderView);
 
-publicationRoutes.use(requireAuth)
+publicationRoutes.use(requireAuth())
 
 publicationRoutes.post("/", upload.array("images", 10), publicationController.createPublication);
 
@@ -27,5 +27,7 @@ publicationRoutes.post("/images/:id/rating", ValidatorHandler(ratingDTO), public
 publicationRoutes.post("/images/:id/comment", ValidatorHandler(commentDTO), publicationController.createComment);
 
 publicationRoutes.delete("/comments/:id", publicationController.deleteComment);
+
+publicationRoutes.delete("/:id", requireAuth("admin"), publicationController.takedown);
 
 module.exports = publicationRoutes;

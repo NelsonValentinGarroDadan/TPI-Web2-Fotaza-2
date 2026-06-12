@@ -6,7 +6,7 @@ const notificationRoutes = Router();
 
 notificationRoutes.get("/", requireAuthPage("auth"), notificationController.renderView);
 
-notificationRoutes.use(requireAuth);
+notificationRoutes.use(requireAuth());
 
 notificationRoutes.get("/unread-count", notificationController.unreadCount);
 
