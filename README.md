@@ -77,9 +77,8 @@ npm install
 # 3. Copiar el archivo de ejemplo y completar los valores
 cp .env.example .env
 
-# 4. Crear la base de datos vacia en PostgreSQL
-#    El nombre debe coincidir con DB_NAME del .env (por defecto: fotaza2)
-#    Ej:  createdb fotaza2   o desde psql:  CREATE DATABASE fotaza2;
+# 4. Crear la base de datos vacia en PostgreSQL (toma el nombre de DB_NAME del .env)
+npm run db:create
 
 # 5. Crear las tablas (migraciones)
 npm run db:init
@@ -92,6 +91,16 @@ npm start
 ```
 
 La app queda accesible en http://localhost:3000.
+
+### Alternativa: restaurar desde la copia de seguridad
+
+En la raiz del proyecto hay un `backup.sql` con el esquema completo y los datos de
+prueba. Si preferis levantar la BD de una sola vez (en lugar de `db:init` + `db:seed`):
+
+```bash
+npm run db:create
+psql -h localhost -U postgres -d fotaza2 -f backup.sql
+```
 
 Para desarrollo puedo usar `npm run dev` (recarga automatica) y en otra terminal `npm run dev:css` para compilar Tailwind en modo watch.
 

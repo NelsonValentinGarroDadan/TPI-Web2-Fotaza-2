@@ -28,8 +28,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   User.init({
-    nickname: DataTypes.STRING,
-    password: DataTypes.STRING,
+    nickname: { type: DataTypes.STRING, allowNull: false, unique: true },
+    password: { type: DataTypes.STRING, allowNull: false },
     biography: DataTypes.STRING,
     profile_img: DataTypes.STRING,
     active: {type: DataTypes.BOOLEAN, defaultValue: true},

@@ -3,7 +3,7 @@ require('dotenv').config();
 
 const host = process.env.DB_HOST || 'localhost';
 const database = process.env.DB_NAME || 'fotaza2';
-const username = process.env.DB_USERNAME || 'postgres';
+const username = process.env.DB_USER || 'postgres';
 const password = process.env.DB_PASSWORD || '';
 
 const sequelize = new Sequelize(database,username,password,{
