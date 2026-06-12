@@ -134,4 +134,4 @@ Tuve problemas con el tamaño de las imagenes, sobre todo en la foto de perfil y
 
 
 ## Deploy
- <a href="https://fotaza-2-21ji.onrender.com/" tagert="blank"> Fotaza 2 </a>
+ <a href="https://fotaza-2-21ji.onrender.com/" tagert="_blank"> Fotaza 2 </a>
