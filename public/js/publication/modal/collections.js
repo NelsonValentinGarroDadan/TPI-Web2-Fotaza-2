@@ -166,12 +166,13 @@ export const initCollections = (ctx) => {
         }
     });
 
-    ctx.onOpen((data) => {
-        if (el.saveWrap) el.saveWrap.classList.toggle("hidden", !authenticated);
+    ctx.onOpen((data, owner) => {
+        const canSave = authenticated && !owner;
+        if (el.saveWrap) el.saveWrap.classList.toggle("hidden", !canSave);
         closeSavePop();
         savedCollections = [];
         updateSaveIcon();
-        if (authenticated && data.id) loadCollections();
+        if (canSave && data.id) loadCollections();
     });
 
     ctx.onClose(closeSavePop);
