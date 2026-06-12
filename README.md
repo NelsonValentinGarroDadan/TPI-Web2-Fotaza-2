@@ -41,6 +41,12 @@
   - Los usuarios podran guardar publicaciones en una seccion de favoritos que solo podra ver el propio usuario. Esta estara dividida en colecciones , las cuales no pueden tener 
     la misma publicacion repetida.
 
+## Diagrama Entidad Relacion
+![DER del proyecto](./documentacion/DER-TPI-WEB2.png)
+
+## Diagrama Relacional
+![DR del proyecto](./documentacion/DR-TPI-WEB2.png)
+
 ## Tecnologias usadas
 
 - Node.js + Express 5 (backend)
@@ -125,8 +131,7 @@ Para la mensajeria privada en tiempo real necesitaba websockets y no sabia por d
 
 Tuve problemas con el tamaño de las imagenes, sobre todo en la foto de perfil y en el detalle de la publicacion. Si la imagen era muy grande tardaba en cargar y rompia el diseño, y si era muy chica se veia pixelada. Lo solucione usando las transformaciones de Cloudinary: en vez de mostrar la imagen original, pido una version ya redimensionada segun donde se muestre, asi siempre llega con el tamaño justo sin importar como la haya subido el usuario.
 
-## Diagrama Entidad Relacion
-![DER del proyecto](./documentacion/DER-TPI-WEB2.png)
 
-## Diagrama Relacional
-![DR del proyecto](./documentacion/DR-TPI-WEB2.png)
+
+## Deploy
+ <a href="https://fotaza-2-21ji.onrender.com/"> Fotaza 2 </a>
