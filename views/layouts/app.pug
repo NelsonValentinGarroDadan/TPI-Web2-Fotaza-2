@@ -1,5 +1,11 @@
 extend ../layouts/main.pug
 include  ../components/navbar.pug
-block content 
+include ../components/messenger.pug
+block content
     +navbar
     block app
+    if user
+        +messenger()
+        script(src="/socket.io/socket.io.js")
+        script(src="/js/messages/messenger.js" type="module")
+        script(src="/js/notifications/bell.js" type="module")

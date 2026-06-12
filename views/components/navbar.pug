@@ -17,13 +17,19 @@ mixin navbar
         )
             img(
                 src="/icons/camera.svg"
+                alt="logo-fotaza2"
                 class="w-10 h-10 p-1 bg-blue border-2 border-black"
             )
             p(class="text-xl text-black font-bold") Fotaza 2
         nav(class="flex items-center gap-1")
             each link in links
-                a(href=link.href)
+                a(href=link.href class="relative")
                     +navItem(link.label, link.icon, link.label, link.href == currentPath, true)
+                    if user && link.icon === "bell"
+                        span(
+                            data-notif-badge
+                            class="hidden absolute top-0 right-0 min-w-5 h-5 px-1 bg-red-500 text-white text-xs font-bold flex items-center justify-center border border-black"
+                        ) 0
 
         div(class="flex items-center justify-center gap-2")
             if(user)

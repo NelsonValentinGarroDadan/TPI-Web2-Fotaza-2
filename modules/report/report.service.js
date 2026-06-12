@@ -1,5 +1,6 @@
 const reportRepository = require("./report.repository");
 const publicationRepository = require("../publication/publication.repository");
+const notificationService = require("../notification/notification.service");
 const AppError = require("../../errors/appError");
 
 module.exports = {
@@ -37,6 +38,13 @@ module.exports = {
             throw new AppError(409, "Ya denunciaste este comentario.");
 
         await reportRepository.createReport({ user_id: userId, comment_id: commentId, reason, description });
+
+        notificationService.notify({
+            recipientId: authorId,
+            actorId: userId,
+            type: "report",
+            imageId: comment.image.id,
+        });
 
         return { reported: true };
     },

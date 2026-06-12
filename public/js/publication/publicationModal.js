@@ -66,6 +66,7 @@ if (modal) {
     let saveOpen = false;
     let savedCollections = [];
     let reportTarget = null;
+    let reportsPopover = null;
 
     const REASON_LABELS = {
         inapropiado: "Contenido inapropiado",
@@ -153,6 +154,30 @@ if (modal) {
         renderRating(img, currentOwner);
         renderImageComments(img);
         if (el.interestWrap) el.interestWrap.classList.toggle("hidden", img.license !== "copyright");
+        loadInterest(img);
+    };
+
+    const setInterest = (sent) => {
+        if (!el.interest) return;
+        el.interest.disabled = sent;
+        el.interest.textContent = sent ? "Ya mostraste interes" : "Me interesa obtenerla";
+        el.interest.classList.toggle("opacity-60", sent);
+        el.interest.classList.toggle("cursor-not-allowed", sent);
+        el.interest.classList.toggle("cursor-pointer", !sent);
+    };
+
+    const loadInterest = async (img) => {
+        if (!authenticated || currentOwner || !img || !img.id || img.license !== "copyright") {
+            setInterest(false);
+            return;
+        }
+        try {
+            const res = await fetch(`/messages/interest/${img.id}`, { credentials: "include" });
+            const data = await res.json().catch(() => ({}));
+            setInterest(Boolean(data.exists));
+        } catch {
+            setInterest(false);
+        }
     };
 
     const renderTags = (tags) => {
@@ -168,6 +193,7 @@ if (modal) {
 
     const renderComments = (comments) => {
         if (!el.comments) return;
+        closeReportsPopover();
         el.comments.innerHTML = "";
         (comments || []).forEach((c) => {
             const item = document.createElement("div");
@@ -193,12 +219,16 @@ if (modal) {
             if (currentOwner) {
                 const count = c.reportsCount || 0;
                 if (count > 0) {
-                    const badge = document.createElement("span");
-                    badge.className = "shrink-0 text-xs text-red-500 font-bold";
+                    const badge = document.createElement("button");
+                    badge.type = "button";
+                    badge.title = "Ver denuncias";
+                    badge.className = "shrink-0 text-xs text-red-500 font-bold underline cursor-pointer";
                     badge.textContent = `${count} denuncia${count > 1 ? "s" : ""}`;
-                    badge.title = (c.reports || [])
-                        .map((r) => `${REASON_LABELS[r.reason] || r.reason} (@${r.reporter}): ${r.description}`)
-                        .join("\n");
+                    const commentReports = c.reports || [];
+                    badge.addEventListener("click", (ev) => {
+                        ev.stopPropagation();
+                        openReportsPopover(badge, commentReports);
+                    });
 
                     const del = document.createElement("button");
                     del.type = "button";
@@ -256,6 +286,103 @@ if (modal) {
         reportTarget = null;
         el.reportDialog.classList.add("hidden");
         el.reportDialog.classList.remove("flex");
+    };
+
+    const closeReportsPopover = () => {
+        if (!reportsPopover) return;
+        reportsPopover.remove();
+        reportsPopover = null;
+    };
+
+    const openReportsPopover = (anchor, reports) => {
+        closeReportsPopover();
+        if (!reports.length) return;
+
+        const pop = document.createElement("div");
+        pop.className = "fixed flex flex-col bg-bk border-2 border-black shadow-lg";
+        pop.style.zIndex = "70";
+        pop.style.width = "20vw";
+        pop.style.minWidth = "210px";
+        pop.style.maxHeight = "40vh";
+
+        const header = document.createElement("div");
+        header.className = "shrink-0 flex items-center justify-between gap-2 bg-linear-to-r from-blue to-blue-l px-2 py-1";
+        const hTitle = document.createElement("span");
+        hTitle.className = "text-white font-bold text-xs truncate";
+        hTitle.textContent = `Denuncias (${reports.length})`;
+        const hClose = document.createElement("button");
+        hClose.type = "button";
+        hClose.className = "shrink-0 flex items-center justify-center bg-red-500 hover:bg-red-700 text-white border border-black cursor-pointer leading-none px-1";
+        hClose.textContent = "✕";
+        hClose.addEventListener("click", closeReportsPopover);
+        header.append(hTitle, hClose);
+
+        const body = document.createElement("div");
+        body.className = "flex-1 min-h-0 overflow-y-auto p-2 flex flex-col gap-1";
+
+        reports.forEach((r) => {
+            const group = document.createElement("div");
+            group.className = "border border-win-gray bg-white";
+
+            const toggle = document.createElement("button");
+            toggle.type = "button";
+            toggle.className = "w-full flex items-center justify-between gap-2 px-2 py-1 text-left text-xs font-bold text-black cursor-pointer hover:bg-win-gray-l/30";
+            const who = document.createElement("span");
+            who.className = "truncate min-w-0";
+            who.textContent = `@${r.reporter || "usuario"}`;
+            const caret = document.createElement("span");
+            caret.className = "shrink-0 opacity-60";
+            caret.textContent = "▸";
+            toggle.append(who, caret);
+
+            const detail = document.createElement("div");
+            detail.className = "hidden border-t border-win-gray px-2 py-1 flex flex-col gap-1 text-xs text-black";
+
+            const reasonP = document.createElement("p");
+            const reasonLabel = document.createElement("span");
+            reasonLabel.className = "font-bold";
+            reasonLabel.textContent = "Causa: ";
+            reasonP.append(reasonLabel, document.createTextNode(REASON_LABELS[r.reason] || r.reason || "—"));
+
+            const descP = document.createElement("p");
+            descP.className = "whitespace-pre-wrap break-words [overflow-wrap:anywhere]";
+            descP.textContent = r.description || "Sin descripcion.";
+
+            const dateP = document.createElement("p");
+            dateP.className = "opacity-60";
+            dateP.textContent = r.date || "";
+
+            detail.append(reasonP, descP, dateP);
+
+            toggle.addEventListener("click", () => {
+                const collapsed = detail.classList.toggle("hidden");
+                caret.textContent = collapsed ? "▸" : "▾";
+            });
+
+            group.append(toggle, detail);
+            body.appendChild(group);
+        });
+
+        pop.append(header, body);
+        document.body.appendChild(pop);
+        reportsPopover = pop;
+
+        const rect = anchor.getBoundingClientRect();
+        const pad = 8;
+        const pw = pop.offsetWidth;
+        const ph = pop.offsetHeight;
+
+        let left = rect.left - pw - pad;
+        if (left < pad) left = rect.right + pad;
+        if (left + pw > window.innerWidth - pad) left = window.innerWidth - pw - pad;
+        if (left < pad) left = pad;
+
+        let top = rect.top;
+        if (top + ph > window.innerHeight - pad) top = window.innerHeight - ph - pad;
+        if (top < pad) top = pad;
+
+        pop.style.left = `${left}px`;
+        pop.style.top = `${top}px`;
     };
 
     const submitReport = async () => {
@@ -384,6 +511,7 @@ if (modal) {
     const close = () => {
         closeSavePop();
         closeReportDialog();
+        closeReportsPopover();
         modal.classList.add("hidden");
         modal.classList.remove("flex");
         document.body.style.overflow = "";
@@ -608,6 +736,12 @@ if (modal) {
         if (!el.saveWrap.contains(e.target)) closeSavePop();
     });
 
+    document.addEventListener("click", (e) => {
+        if (reportsPopover && !reportsPopover.contains(e.target)) closeReportsPopover();
+    });
+
+    el.comments && el.comments.addEventListener("scroll", closeReportsPopover);
+
     el.saveForm && el.saveForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         if (!authenticated) return requireLogin();
@@ -645,8 +779,35 @@ if (modal) {
         }
     });
 
-    el.interest && el.interest.addEventListener("click", () => {
+    el.interest && el.interest.addEventListener("click", async () => {
         if (!authenticated) return requireLogin();
+
+        const img = images[index];
+        if (!img || !img.id || el.interest.disabled) return;
+
+        el.interest.disabled = true;
+
+        try {
+            const res = await fetch("/messages/interest", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ imageId: img.id }),
+            });
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                window.showToast?.(data.message || "No se pudo enviar tu interes.", "error");
+                el.interest.disabled = false;
+                return;
+            }
+
+            setInterest(true);
+            window.showToast?.(data.message || "Le enviamos tu interes al autor! Lo vas a encontrar en tu bandeja de mensajes.", "success");
+        } catch {
+            window.showToast?.("Error de red.", "error");
+            el.interest.disabled = false;
+        }
     });
 
     el.report && el.report.addEventListener("click", () => {
@@ -704,7 +865,9 @@ if (modal) {
     el.close && el.close.addEventListener("click", close);
     el.backdrop && el.backdrop.addEventListener("click", close);
     document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && !modal.classList.contains("hidden")) close();
+        if (e.key !== "Escape" || modal.classList.contains("hidden")) return;
+        if (reportsPopover) return closeReportsPopover();
+        close();
     });
 
     document.addEventListener("click", (e) => {
@@ -724,4 +887,28 @@ if (modal) {
         currentRoot = root;
         open(data, root.dataset.owner === "true");
     });
+
+    const openById = (pubId) => {
+        const root = [...document.querySelectorAll("[data-pub]")].find((r) => {
+            try {
+                return String(JSON.parse(r.dataset.publication || "{}").id) === String(pubId);
+            } catch {
+                return false;
+            }
+        });
+        if (!root) return;
+
+        let data = {};
+        try {
+            data = JSON.parse(root.dataset.publication || "{}");
+        } catch {
+            data = {};
+        }
+        currentData = data;
+        currentRoot = root;
+        open(data, root.dataset.owner === "true");
+    };
+
+    const pubFromQuery = new URLSearchParams(window.location.search).get("publication");
+    if (pubFromQuery) openById(pubFromQuery);
 }

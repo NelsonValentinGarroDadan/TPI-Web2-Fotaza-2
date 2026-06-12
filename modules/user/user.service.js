@@ -1,4 +1,5 @@
 const userRepository = require("./user.repository");
+const notificationService = require("../notification/notification.service");
 const AppError = require("../../errors/appError");
 const { avatarImage } = require("../../utils/cloudinaryUrl");
 
@@ -37,7 +38,14 @@ module.exports = {
         if (!target) throw new AppError(404, "Usuario no encontrado");
 
         const already = await userRepository.isFollowing(viewerId, targetId);
-        if (!already) await userRepository.follow(viewerId, targetId);
+        if (!already) {
+            await userRepository.follow(viewerId, targetId);
+            notificationService.notify({
+                recipientId: targetId,
+                actorId: viewerId,
+                type: "follow",
+            });
+        }
 
         return { isFollowing: true };
     },

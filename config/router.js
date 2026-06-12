@@ -5,6 +5,8 @@ const publicationRoutes = require('../modules/publication/publication.routes.js'
 const publicationController = require('../modules/publication/publication.controller.js');
 const collectionRoutes = require('../modules/collection/collection.routes.js');
 const reportRoutes = require('../modules/report/report.routes.js');
+const messageRoutes = require('../modules/message/message.routes.js');
+const notificationRoutes = require('../modules/notification/notification.routes.js');
 const router = Router();
 
 
@@ -19,5 +21,7 @@ router.use("/profile", userRoutes);
 router.use("/upload", publicationRoutes);
 router.use("/collections", collectionRoutes);
 router.use("/reports", reportRoutes);
+router.use("/messages", messageRoutes);
+router.use("/notifications", notificationRoutes);
 
 module.exports =  router;
