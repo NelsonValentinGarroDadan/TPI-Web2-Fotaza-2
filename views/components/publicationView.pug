@@ -21,7 +21,7 @@ mixin publicationView(pub, preview)
             div(class="bg-white border-2 border-black")
                 div(class="bg-linear-to-r from-blue to-blue-l px-3 py-1")
                     h2(class="text-white font-bold text-sm" data-pv-title) #{pub.title || "Titulo de la publicacion"}
-                div(class="relative flex items-center justify-center bg-win-gray-l/30 min-h-[18rem]" data-pv-carousel)
+                div(class="relative flex items-center justify-center bg-win-gray-l/30 min-h-72" data-pv-carousel)
                     p(data-pv-empty class=(imgs.length ? "hidden " : "") + "text-win-gray text-sm") Sin imagenes
                     img(data-pv-image src=(firstImg.url || "") alt="" class=(imgs.length ? "" : "hidden ") + "w-full max-h-[28rem] object-contain")
                     button(type="button" data-pv-prev class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white border-2 border-black text-black text-lg leading-none cursor-pointer") ‹
