@@ -1,6 +1,6 @@
 const collectionRepository = require("./collection.repository");
 const publicationRepository = require("../publication/publication.repository");
-const { shapePublication } = require("../publication/publication.service");
+const { shapePublication } = require("../publication/publication.functions");
 const userRepository = require("../user/user.repository");
 const AppError = require("../../errors/appError");
 
