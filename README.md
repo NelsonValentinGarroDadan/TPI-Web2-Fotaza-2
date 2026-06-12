@@ -41,8 +41,92 @@
   - Los usuarios podran guardar publicaciones en una seccion de favoritos que solo podra ver el propio usuario. Esta estara dividida en colecciones , las cuales no pueden tener 
     la misma publicacion repetida.
 
-## Diagrama Entidad Relacion (v1)
-![DER del proyecto](./DER-TPI-WEB2.png)
+## Tecnologias usadas
 
-## Diagrama Relacional (v1)
-![DER del proyecto](./DR-TPI-WEB2.png)
+- Node.js + Express 5 (backend)
+- Pug para renderizar las vistas del lado del servidor
+- PostgreSQL + Sequelize (ORM y migraciones)
+- Tailwind CSS para los estilos
+- Cloudinary para guardar las imagenes y aplicar transformaciones
+- Socket.IO para la mensajeria y las notificaciones en tiempo real
+- JWT (cookies) + bcrypt para la autenticacion
+- Zod para validar los datos
+
+## Requisitos previos
+
+- Node.js 18 o superior
+- PostgreSQL instalado y corriendo
+- Una cuenta de Cloudinary (para subir imagenes nuevas)
+
+## Instalacion y ejecucion en local
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/NelsonValentinGarroDadan/TPI-Web2-Fotaza-2.git
+cd TPI-Web2-Fotaza-2
+
+# 2. Instalar dependencias
+npm install
+
+# 3. Copiar el archivo de ejemplo y completar los valores
+cp .env.example .env
+
+# 4. Crear la base de datos vacia en PostgreSQL
+#    El nombre debe coincidir con DB_NAME del .env (por defecto: fotaza2)
+#    Ej:  createdb fotaza2   o desde psql:  CREATE DATABASE fotaza2;
+
+# 5. Crear las tablas (migraciones)
+npm run db:init
+
+# 6. Cargar los datos de prueba (opcional pero recomendado)
+npm run db:seed
+
+# 7. Levantar el servidor
+npm start
+```
+
+La app queda accesible en http://localhost:3000.
+
+Para desarrollo puedo usar `npm run dev` (recarga automatica) y en otra terminal `npm run dev:css` para compilar Tailwind en modo watch.
+
+## Variables de entorno
+
+Estan documentadas en el archivo `.env.example`. Hay que crear un `.env` a partir de ese ejemplo:
+
+- `PORT` - puerto del servidor (por defecto 3000)
+- `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` - conexion a PostgreSQL
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` - credenciales de Cloudinary
+- `DEFAULT_PROFILE_IMG` - ruta de la imagen de perfil por defecto
+- `JWT_SECRET`, `JWT_EXPIRES_IN` - firma y expiracion del token de sesion
+- `NODE_ENV` - entorno (development / production)
+
+## Usuarios de prueba
+
+Estos usuarios se cargan con `npm run db:seed`. El login es por nickname.
+
+- Contraseña para todos: `Password123!`
+
+- `admin` - rol validador / administrador. Es el unico que entra al panel `/admin` (cola de denuncias, dar de baja o desestimar publicaciones).
+- `ana` - usuario comun, fotografa de paisajes.
+- `beto` - usuario comun, fotografia urbana. Tiene el escenario de cuenta con publicaciones dadas de baja.
+- `caro` - usuario comun, retratos.
+- `dami` - usuario comun, naturaleza y fauna.
+- `eli` - usuario comun, fotos de viajes.
+
+Ademas del usuario, el seed deja cargado contenido de ejemplo: publicaciones con imagenes y etiquetas, valoraciones, comentarios, seguimientos, colecciones, notificaciones, conversaciones de mensajeria y un escenario de denuncias (incluida una imagen que supera las 3 denuncias y cae en la cola del validador).
+
+## Problemas que encontre y como los resolvi
+
+### No sabia como implementar websocket
+
+Para la mensajeria privada en tiempo real necesitaba websockets y no sabia por donde arrancar, era la primera vez que trabajaba con esto. Lo resolvi buscando documentacion y mirando varios videos en YouTube hasta entender bien como funcionaban los eventos. Termine integrando Socket.IO sobre el mismo servidor de Express y usando una sala por usuario para que cada mensaje y notificacion le llegue solo a quien corresponde.
+
+### El tamaño de las imagenes
+
+Tuve problemas con el tamaño de las imagenes, sobre todo en la foto de perfil y en el detalle de la publicacion. Si la imagen era muy grande tardaba en cargar y rompia el diseño, y si era muy chica se veia pixelada. Lo solucione usando las transformaciones de Cloudinary: en vez de mostrar la imagen original, pido una version ya redimensionada segun donde se muestre, asi siempre llega con el tamaño justo sin importar como la haya subido el usuario.
+
+## Diagrama Entidad Relacion
+![DER del proyecto](./documentacion/DER-TPI-WEB2.png)
+
+## Diagrama Relacional
+![DR del proyecto](./documentacion/DR-TPI-WEB2.png)
