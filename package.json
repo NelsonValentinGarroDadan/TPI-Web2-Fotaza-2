@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node ./index.js",
+    "db:create": "npx sequelize-cli db:create",
     "db:init": "npx sequelize-cli db:migrate",
     "db:seed": "node ./seeders/seed.js",
     "dev": "node  --watch --trace-warnings ./index.js",

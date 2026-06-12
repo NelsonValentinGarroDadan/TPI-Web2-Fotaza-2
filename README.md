@@ -41,11 +41,17 @@
   - Los usuarios podran guardar publicaciones en una seccion de favoritos que solo podra ver el propio usuario. Esta estara dividida en colecciones , las cuales no pueden tener 
     la misma publicacion repetida.
 
-## Diagrama Entidad Relacion
+## Diagrama Entidad Relacion v1
 ![DER del proyecto](./documentacion/DER-TPI-WEB2.png)
 
-## Diagrama Relacional
+## Diagrama Entidad Relacion v2 (final)
+![DER del proyecto](./documentacion/DER-TPI-WEB2-V2.png)
+
+## Diagrama Relacional v1
 ![DR del proyecto](./documentacion/DR-TPI-WEB2.png)
+
+## Diagrama Relacional v2 (final)
+![DR del proyecto](./documentacion/DR-TPI-WEB2-V2.png)
 
 ## Tecnologias usadas
 
