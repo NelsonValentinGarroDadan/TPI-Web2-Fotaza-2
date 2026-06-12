@@ -276,16 +276,16 @@ if (modal) {
         if (el.reportTitle) el.reportTitle.textContent = type === "comment" ? "Denunciar comentario" : "Denunciar imagen";
         if (el.reportReason) el.reportReason.selectedIndex = 0;
         if (el.reportDescription) el.reportDescription.value = "";
-        if (el.reportError) el.reportError.classList.add("hidden");
-        el.reportDialog.classList.remove("hidden");
-        el.reportDialog.classList.add("flex");
+        if (el.reportError) el.reportError.textContent = "";
+        el.reportDialog.classList.remove("opacity-0", "pointer-events-none");
+        el.reportDialog.classList.add("opacity-100", "pointer-events-auto");
     };
 
     const closeReportDialog = () => {
         if (!el.reportDialog) return;
         reportTarget = null;
-        el.reportDialog.classList.add("hidden");
-        el.reportDialog.classList.remove("flex");
+        el.reportDialog.classList.add("opacity-0", "pointer-events-none");
+        el.reportDialog.classList.remove("opacity-100", "pointer-events-auto");
     };
 
     const closeReportsPopover = () => {
@@ -392,10 +392,7 @@ if (modal) {
         const description = (el.reportDescription && el.reportDescription.value || "").trim();
 
         if (!description) {
-            if (el.reportError) {
-                el.reportError.textContent = "Conta el motivo de la denuncia.";
-                el.reportError.classList.remove("hidden");
-            }
+            if (el.reportError) el.reportError.textContent = "Conta el motivo de la denuncia.";
             return;
         }
 

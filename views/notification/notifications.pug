@@ -1,0 +1,60 @@
+extend ../layouts/app.pug
+include ../components/win-border.pug
+include ../components/icon.pug
+
+block app
+    section(class="flex flex-col items-center justify-start w-full py-8 px-4")
+        div(class="w-full max-w-2xl flex flex-col gap-4")
+
+            div(class="shrink-0 flex items-center justify-between gap-2 bg-linear-to-r from-blue to-blue-l px-3 py-2 border-2 border-black")
+                h1(class="flex items-center gap-2 text-white font-bold")
+                    +icon("bell", "w-5 h-5")
+                    | Notificaciones
+                if unread
+                    div(data-read-all-wrap)
+                        +winBorder()
+                            button(
+                                type="button"
+                                data-notif-read-all
+                                class="px-3 py-2 bg-win-gray-l hover:bg-[#b6b6b6] text-sm text-black cursor-pointer"
+                            ) Marcar todas como leidas
+
+            div(data-notif-list class="flex flex-col bg-white border-2 border-black max-h-[70vh] overflow-y-auto")
+                if !notifications || !notifications.length
+                    p(data-notif-empty class="p-6 text-sm text-black opacity-60 text-center") Todavia no tenes notificaciones. Cuando alguien interactue con tu contenido vas a verlo aca.
+                else
+                    each n in notifications
+                        div(
+                            data-notif
+                            data-id=n.id
+                            data-read=(n.read ? "true" : "false")
+                            class=("flex items-center gap-3 px-3 py-3 border-b border-win-gray " + (n.read ? "bg-white" : "bg-blue-l/10"))
+                        )
+                            a(href=n.href class="shrink-0")
+                                img(
+                                    src=(n.actor.profile_img || "/imgs/profile_img_default.png")
+                                    alt=""
+                                    class="block w-10 h-10 object-cover border border-black"
+                                )
+
+                            a(href=n.href class="flex-1 min-w-0 hover:text-blue-l")
+                                p(class="text-sm text-black")
+                                    span(class="font-bold") @#{n.actor.nickname}
+                                    |  #{n.text}
+                                p(class="text-xs text-black opacity-60") #{n.date}
+
+                            if n.imageThumb
+                                a(href=n.href class="shrink-0")
+                                    img(src=n.imageThumb alt="" class="block w-10 h-10 object-cover border border-black")
+
+                            div(class="shrink-0 flex items-center gap-2")
+                                if !n.read
+                                    span(data-notif-dot title="No leida" class="w-2.5 h-2.5 bg-blue-l border border-black")
+                                    button(
+                                        type="button"
+                                        data-notif-read
+                                        title="Marcar como leida"
+                                        class="px-2 py-1 bg-win-gray/30 hover:bg-win-gray/50 text-xs text-black border border-black cursor-pointer"
+                                    ) Leida
+
+    script(src="/js/notifications/notifications.js" type="module")

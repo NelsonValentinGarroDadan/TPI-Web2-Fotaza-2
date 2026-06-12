@@ -109,9 +109,9 @@ mixin publicationModal()
                                     +winBorder()
                                         button(type="button" data-pv-comment-send class="px-4 py-1 bg-win-gray/30 hover:bg-win-gray/50 text-sm text-black cursor-pointer") Comentar
                             p(data-pv-comments-disabled class="hidden text-xs text-black opacity-60") Los comentarios estan deshabilitados en esta publicacion.
-                        div(data-pv-comments class="w-[50%] min-w-0 min-h-0 overflow-y-auto flex flex-col gap-2")
+                        div(data-pv-comments class="md:w-[50%] min-w-0 min-h-0 overflow-y-auto flex flex-col gap-2")
 
-        div(data-report-dialog class="hidden absolute inset-0 z-50 items-center justify-center p-4")
+        div(data-report-dialog class="absolute inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-150")
             div(data-report-backdrop class="absolute inset-0 bg-black/60")
 
             div(class="relative w-[90vw] max-w-md flex flex-col bg-bk border-2 border-black")
@@ -136,7 +136,7 @@ mixin publicationModal()
                         label(class="text-sm font-bold text-black") Descripcion
                         +winBorder("w-full")
                             textarea(data-report-description maxlength="250" class="w-full h-20 resize-none text-sm text-black px-2 py-1" placeholder="Conta por que estas denunciando...")
-                    p(data-report-error class="hidden text-sm text-red-500")
+                    p(data-report-error class="h-5 text-sm text-red-500") 
                     div(class="flex justify-end gap-2")
                         +winBorder()
                             button(type="button" data-report-cancel class="px-4 py-1 bg-win-gray/30 hover:bg-win-gray/50 text-sm text-black cursor-pointer") Cancelar

@@ -3,6 +3,7 @@ const { sequelize } = require("../../models");
 const cloudinary = require("../../config/cloudinary");
 const publicationRepository = require("./publication.repository");
 const userRepository = require("../user/user.repository");
+const notificationService = require("../notification/notification.service");
 const AppError = require("../../errors/appError");
 const { cardImage, detailImage, avatarImage } = require("../../utils/cloudinaryUrl");
 
@@ -419,6 +420,13 @@ module.exports = {
             value: score,
         });
 
+        notificationService.notify({
+            recipientId: image.publication.user_id,
+            actorId: userId,
+            type: "rating",
+            imageId,
+        });
+
         const ratings = await publicationRepository.getRatings(imageId);
         const { average, count } = aggregateRatings(ratings);
 
@@ -437,6 +445,13 @@ module.exports = {
             user_id: userId,
             image_id: imageId,
             content,
+        });
+
+        notificationService.notify({
+            recipientId: image.publication.user_id,
+            actorId: userId,
+            type: "comment",
+            imageId,
         });
 
         const author = await userRepository.getProfileById(userId);
