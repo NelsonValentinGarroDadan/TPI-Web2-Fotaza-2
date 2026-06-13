@@ -1,32 +1,8 @@
 require("dotenv").config();
 const bcrypt = require("bcrypt");
-const cloudinary = require("../config/cloudinary");
-const { signBuffer } = require("../utils/watermark");
 const { sequelize, User, Publication, Image, Tag, Rating, Comment, Collection, Report, Conversation, Message, Notification } = require("../models");
 
 const PASSWORD = "Password123!";
-
-const fetchBuffer = async (url) => {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`No se pudo descargar ${url} (${res.status})`);
-    return Buffer.from(await res.arrayBuffer());
-};
-
-const uploadSeedBuffer = (buffer) =>
-    new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-            { folder: "fotaza/seed" },
-            (err, result) => (err ? reject(err) : resolve(result))
-        );
-        stream.end(buffer);
-    });
-
-const resolveImageUrl = async (sourceUrl, text) => {
-    if (!text) return sourceUrl;
-    const signed = await signBuffer(await fetchBuffer(sourceUrl), text);
-    const uploaded = await uploadSeedBuffer(signed);
-    return uploaded.secure_url;
-};
 
 const IMAGE_URLS = [
     "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066377/fotaza/seed/rsppiufxbziyltndewmk.jpg",
@@ -34,11 +10,11 @@ const IMAGE_URLS = [
     "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066382/fotaza/seed/mozk05az3qoj3jejpb8f.jpg",
     "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066386/fotaza/seed/dw0pobvmzh1nhkwq34vp.jpg",
     "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066387/fotaza/seed/dx68qtixloyidbbtxekk.jpg",
-    "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066390/fotaza/seed/z4ae6n9qptw2wzspcdrs.jpg",
+    "https://res.cloudinary.com/dkoff52tr/image/upload/v1781314922/fotaza/seed/qcymi0zj1g5bnnju5htj.jpg",
     "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066394/fotaza/seed/r5ajtvqfjyafr9ba3zia.jpg",
     "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066396/fotaza/seed/s2bf7fwohii7v7uc1dkt.jpg",
-    "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066399/fotaza/seed/j23oditv0j3gpe8cocmv.jpg",
-    "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066402/fotaza/seed/jyvsuzx25z4lq6rvmn7u.jpg",
+    "https://res.cloudinary.com/dkoff52tr/image/upload/v1781314924/fotaza/seed/ybjsaqsahupjopynjriq.jpg",
+    "https://res.cloudinary.com/dkoff52tr/image/upload/v1781314927/fotaza/seed/fyh6kj2dmprl7mpifogr.jpg",
     "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066404/fotaza/seed/pszyewerlgvbgrsdajrr.jpg",
     "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066408/fotaza/seed/nycirvezsruhakrulujv.jpg",
     "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066410/fotaza/seed/efq8e6b6fslqrbugkmws.jpg",
@@ -50,7 +26,7 @@ const IMAGE_URLS = [
     "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066427/fotaza/seed/afrv0j9z25qikxg6jj9c.jpg",
     "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066428/fotaza/seed/p1ekrcax0h9a5kaa5uuy.jpg",
     "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066431/fotaza/seed/hky71mbzuckmkkiojrr2.jpg",
-    "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066433/fotaza/seed/g3prw4e2zmczustqhgde.jpg",
+    "https://res.cloudinary.com/dkoff52tr/image/upload/v1781314930/fotaza/seed/szkikdhwpr90ar9ugbtx.jpg",
     "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066435/fotaza/seed/vhoxlnjuyabz7okb8x6d.jpg",
     "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066437/fotaza/seed/k4xva80sufll6o5yfead.jpg",
 ];
@@ -157,7 +133,7 @@ const seed = async () => {
 
             const license = p.license || "sin_copyright";
             const text = license === "copyright" ? author.nickname : null;
-            const url = await resolveImageUrl(sourceUrl, text);
+            const url = sourceUrl;
 
             const image = await Image.create({
                 publication_id: pub.id,
