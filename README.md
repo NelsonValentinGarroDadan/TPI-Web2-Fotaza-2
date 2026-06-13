@@ -150,3 +150,6 @@ Tuve problemas con el tamaño de las imagenes, sobre todo en la foto de perfil y
 
 ## Deploy
  <a href="https://fotaza-2-21ji.onrender.com/" > Fotaza 2 </a>
+
+## Video de presentacion
+  <a href="https://youtu.be/349SuzdXtWU" > Video de YouTube </a>

@@ -1,8 +1,32 @@
 require("dotenv").config();
 const bcrypt = require("bcrypt");
+const cloudinary = require("../config/cloudinary");
+const { signBuffer } = require("../utils/watermark");
 const { sequelize, User, Publication, Image, Tag, Rating, Comment, Collection, Report, Conversation, Message, Notification } = require("../models");
 
 const PASSWORD = "Password123!";
+
+const fetchBuffer = async (url) => {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`No se pudo descargar ${url} (${res.status})`);
+    return Buffer.from(await res.arrayBuffer());
+};
+
+const uploadSeedBuffer = (buffer) =>
+    new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            { folder: "fotaza/seed" },
+            (err, result) => (err ? reject(err) : resolve(result))
+        );
+        stream.end(buffer);
+    });
+
+const resolveImageUrl = async (sourceUrl, text) => {
+    if (!text) return sourceUrl;
+    const signed = await signBuffer(await fetchBuffer(sourceUrl), text);
+    const uploaded = await uploadSeedBuffer(signed);
+    return uploaded.secure_url;
+};
 
 const IMAGE_URLS = [
     "https://res.cloudinary.com/dkoff52tr/image/upload/v1781066377/fotaza/seed/rsppiufxbziyltndewmk.jpg",
@@ -128,14 +152,17 @@ const seed = async () => {
         const tagInstances = p.tags.map((t) => tags[t]);
 
         for (let k = 0; k < p.images; k++) {
-            const url = pool[imgCursor % pool.length];
+            const sourceUrl = pool[imgCursor % pool.length];
             imgCursor++;
 
             const license = p.license || "sin_copyright";
+            const text = license === "copyright" ? author.nickname : null;
+            const url = await resolveImageUrl(sourceUrl, text);
+
             const image = await Image.create({
                 publication_id: pub.id,
                 url,
-                text_markwater: license === "copyright" ? author.nickname : null,
+                text_markwater: text,
                 license,
                 order_number: k,
             });
